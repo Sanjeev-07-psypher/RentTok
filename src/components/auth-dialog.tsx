@@ -126,7 +126,7 @@ export function AuthDialog({
 
         {stage === "email" ? (
           <>
-            <h2 className="text-2xl font-bold tracking-tight">Welcome to Rent-tok</h2>
+            <h2 className="text-2xl font-bold tracking-tight">Welcome to RentTok</h2>
             <p className="mt-1.5 text-sm text-[var(--muted)]">
               Sign in or create an account to book rooms and contact owners.
             </p>
@@ -178,7 +178,7 @@ export function AuthDialog({
             </div>
 
             <p className="mt-5 text-center text-xs text-[var(--muted)]">
-              By continuing you agree to Rent-tok&apos;s Terms & Privacy Policy.
+              By continuing you agree to RentTok&apos;s Terms & Privacy Policy.
             </p>
           </>
         ) : stage === "phone" ? (

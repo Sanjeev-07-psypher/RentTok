@@ -66,7 +66,10 @@ export function SearchFilters() {
 
       <div>
         <label className="mb-1.5 block text-sm font-medium">Area</label>
-        <Select value={params.get("area") ?? ""} onChange={(e) => setParam("area", e.target.value)}>
+        <Select
+          value={params.get("area") ?? ""}
+          onChange={(e) => setManyParams({ area: e.target.value || null, q: null })}
+        >
           <option value="">All areas</option>
           {AREAS.map((a) => (
             <option key={a} value={a}>{a}</option>

@@ -11,7 +11,7 @@ import { DeleteListingButton } from "@/components/delete-listing-button";
 import { DeleteBuildingButton } from "@/components/delete-building-button";
 import type { Building, Room } from "@/lib/types";
 
-export const metadata = { title: "Owner dashboard — Rent-tok" };
+export const metadata = { title: "Owner dashboard — RentTok" };
 
 const statusStyle: Record<string, string> = {
   pending: "bg-yellow-500/15 text-yellow-500",

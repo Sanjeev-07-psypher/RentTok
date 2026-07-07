@@ -1,16 +1,16 @@
 import Link from "next/link";
 import { PageShell } from "@/components/page-shell";
 
-export const metadata = { title: "Help & FAQ — Rent-tok" };
+export const metadata = { title: "Help & FAQ — RentTok" };
 
 const FAQS: { q: string; a: React.ReactNode }[] = [
   {
     q: "Do I need an account to browse rooms?",
-    a: "No. You can search and view every listing for free. You only sign in when you want to reserve a room.",
+    a: "No. You can search and view every listing without an account. You only sign in when you want to reserve a room.",
   },
   {
-    q: "Does it cost anything to book?",
-    a: "No. Rent-tok is completely free to use right now — no booking fees, no brokerage. You just send a free request to join the owner's queue, and the owner reaches out to finalise.",
+    q: "How does reserving a room work?",
+    a: "You send a request to join the owner's queue. The owner reviews it and reaches out to you directly to finalise — no middlemen involved.",
   },
   {
     q: "How do I sign in?",
@@ -22,7 +22,7 @@ const FAQS: { q: string; a: React.ReactNode }[] = [
       <>
         Head to <Link href="/owner" className="text-[var(--primary)] hover:underline">List your space</Link>,
         add photos, rent, amenities and house rules. Our team reviews it, and once approved it goes
-        live for students to find.
+        live for people to find.
       </>
     ),
   },
@@ -32,13 +32,13 @@ const FAQS: { q: string; a: React.ReactNode }[] = [
   },
   {
     q: "Is my data secure?",
-    a: "Yes. We only collect what's needed to connect you with owners, and identity documents are stored privately and reviewed manually. Rent-tok is free to use.",
+    a: "Yes. We only collect what's needed to connect you with owners, and identity documents are stored privately and reviewed manually.",
   },
 ];
 
 export default function HelpPage() {
   return (
-    <PageShell title="Help & FAQ" intro="Quick answers to the things students and owners ask most.">
+    <PageShell title="Help & FAQ" intro="Quick answers to the things tenants and owners ask most.">
       <div className="space-y-4">
         {FAQS.map((f) => (
           <details

@@ -7,7 +7,7 @@ import { Card } from "@/components/ui";
 import { ConnectNotice } from "@/components/connect-notice";
 import { BuildingCard } from "@/components/building-card";
 
-export const metadata = { title: "Wishlist — Rent-tok" };
+export const metadata = { title: "Wishlist — RentTok" };
 
 export default async function WishlistPage() {
   if (!isSupabaseConfigured) return <ConnectNotice feature="Wishlist" />;

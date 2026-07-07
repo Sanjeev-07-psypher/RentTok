@@ -12,7 +12,7 @@ export function ReviewList({ reviews }: { reviews: Review[] }) {
       {reviews.map((r) => (
         <div key={r.id} className="border-b border-[var(--border)] pb-4 last:border-0">
           <div className="flex items-center justify-between">
-            <span className="font-medium">{r.reviewer?.full_name ?? "Student"}</span>
+            <span className="font-medium">{r.reviewer?.full_name ?? "Guest"}</span>
             <span className="flex items-center gap-0.5 text-sm">
               {[1, 2, 3, 4, 5].map((n) => (
                 <Star

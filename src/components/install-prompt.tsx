@@ -73,7 +73,7 @@ export function InstallPrompt() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/icon.svg" alt="" className="h-11 w-11 rounded-xl" />
         <div className="pr-6">
-          <p className="text-sm font-semibold">Install the Rent-tok app</p>
+          <p className="text-sm font-semibold">Install the RentTok app</p>
           {iosHint ? (
             <p className="mt-0.5 text-xs text-[var(--muted)]">
               Tap <Share size={12} className="inline" /> Share, then &ldquo;Add to Home Screen&rdquo;.

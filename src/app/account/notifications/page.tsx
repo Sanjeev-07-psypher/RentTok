@@ -8,7 +8,7 @@ import { Card } from "@/components/ui";
 import { ConnectNotice } from "@/components/connect-notice";
 import { MarkNotificationsRead } from "@/components/mark-notifications-read";
 
-export const metadata = { title: "Notifications — Rent-tok" };
+export const metadata = { title: "Notifications — RentTok" };
 
 function icon(type: string) {
   if (type === "listing_approved") return <CheckCircle2 size={18} className="text-green-600 dark:text-green-400" />;

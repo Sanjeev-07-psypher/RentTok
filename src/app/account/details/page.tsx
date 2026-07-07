@@ -5,7 +5,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { ConnectNotice } from "@/components/connect-notice";
 import { TenantDetailsForm } from "@/components/tenant-details-form";
 
-export const metadata = { title: "Your details — Rent-tok" };
+export const metadata = { title: "Your details — RentTok" };
 
 export default async function DetailsPage(props: PageProps<"/account/details">) {
   if (!isSupabaseConfigured) return <ConnectNotice feature="Your details" />;

@@ -9,7 +9,7 @@ import { ConnectNotice } from "@/components/connect-notice";
 import { EditRoomForm } from "@/components/edit-room-form";
 import type { Room } from "@/lib/types";
 
-export const metadata = { title: "Edit room — Rent-tok" };
+export const metadata = { title: "Edit room — RentTok" };
 
 export default async function EditRoomPage(props: PageProps<"/owner/rooms/[id]/edit">) {
   if (!isSupabaseConfigured) return <ConnectNotice feature="Edit room" />;

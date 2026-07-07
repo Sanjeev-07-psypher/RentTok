@@ -46,7 +46,7 @@ export async function reviewListing(buildingId: string, status: "approved" | "re
     title: status === "approved" ? `“${building.name}” is now live` : `“${building.name}” was not approved`,
     body:
       status === "approved"
-        ? "Your building passed review and is now visible to students. You can add or edit rooms anytime."
+        ? "Your building passed review and is now live. You can add or edit rooms anytime."
         : "Your listing didn’t pass review. Please check the details (ownership, accuracy) and feel free to resubmit or contact support.",
   });
 

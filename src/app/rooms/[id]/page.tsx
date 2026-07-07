@@ -49,7 +49,7 @@ export default async function RoomPage(props: PageProps<"/rooms/[id]">) {
             <Image src={photos[0].url} alt={room.title} fill className="object-cover" sizes="(max-width:768px) 100vw, 50vw" />
           ) : (
             <div className="grid h-full min-h-[260px] place-items-center bg-gradient-to-br from-[var(--surface-2)] to-[var(--surface)]">
-              <span className="text-4xl font-extrabold tracking-tight text-[var(--primary)]/35">Rent-tok</span>
+              <span className="text-4xl font-extrabold tracking-tight text-[var(--primary)]/35">RentTok</span>
             </div>
           )}
         </div>

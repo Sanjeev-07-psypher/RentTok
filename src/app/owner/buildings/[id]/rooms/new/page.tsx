@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { ConnectNotice } from "@/components/connect-notice";
 import { AddRoomForm } from "@/components/add-room-form";
 
-export const metadata = { title: "Add a room — Rent-tok" };
+export const metadata = { title: "Add a room — RentTok" };
 
 export default async function AddRoomPage(props: PageProps<"/owner/buildings/[id]/rooms/new">) {
   if (!isSupabaseConfigured) return <ConnectNotice feature="Add a room" />;

@@ -100,7 +100,7 @@ function building(
 export const SAMPLE_BUILDINGS: Building[] = [
   building({
     id: "b-1", owner_id: "demo-owner", name: "Valley View Residency", type: "pg",
-    description: "Student-friendly PG a short walk from Tadong College, with single and sharing rooms.",
+    description: "A comfortable PG a short walk from Tadong, with single and sharing rooms.",
     area: "Tadong", address: "Near Tadong College, Tadong", lat: 27.305, lng: 88.61,
     amenities: ["wifi", "geyser", "study_table", "drinking_water"], rating: 4.8, review_count: 160, created_at: now,
   }),
@@ -124,7 +124,7 @@ export const SAMPLE_BUILDINGS: Building[] = [
   }),
   building({
     id: "b-5", owner_id: "demo-owner", name: "Ranipool Boys Hostel", type: "hostel",
-    description: "Budget hostel beds with mess — great for first-year students.",
+    description: "Budget hostel beds with mess — clean, simple and great value.",
     area: "Ranipool", address: "Ranipool, Gangtok", lat: 27.29, lng: 88.59,
     amenities: ["wifi", "food", "drinking_water", "laundry"], rating: 4.3, review_count: 33, created_at: now,
   }),

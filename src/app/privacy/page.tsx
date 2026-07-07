@@ -1,6 +1,6 @@
 import { PageShell, Section } from "@/components/page-shell";
 
-export const metadata = { title: "Privacy Policy — Rent-tok" };
+export const metadata = { title: "Privacy Policy — RentTok" };
 
 export default function PrivacyPage() {
   return (
@@ -24,9 +24,9 @@ export default function PrivacyPage() {
       </Section>
       <Section heading="Who can see your data">
         <p>
-          Owners only see the contact details of students who have requested their room. We don&apos;t
+          Owners only see the contact details of tenants who have requested their room. We don&apos;t
           sell your data, and we don&apos;t share it with third parties except the infrastructure
-          providers needed to operate (hosting, database, and payment processing).
+          providers needed to operate (such as hosting and database).
         </p>
       </Section>
       <Section heading="Your control">

@@ -9,8 +9,8 @@ const DONE_KEY = "rt_tour_done";
 const steps = [
   {
     popover: {
-      title: "Welcome to Rent-tok 👋",
-      description: "Find student rooms, PGs, flats and hostels across Gangtok — completely free, no brokerage.",
+      title: "Welcome to RentTok 👋",
+      description: "Find rooms, PGs, flats and hostels across Gangtok — verified and easy to reserve.",
     },
   },
   {
@@ -27,8 +27,8 @@ const steps = [
   },
   {
     popover: {
-      title: "Request for free",
-      description: "Found a room? Send a free request to join the owner’s queue — they’ll reach out to you directly.",
+      title: "Send a request",
+      description: "Found a room? Send a request to join the owner’s queue — they’ll reach out to you directly.",
     },
   },
   {

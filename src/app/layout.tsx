@@ -10,16 +10,22 @@ import { Walkthrough } from "@/components/walkthrough";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 
+// Prefer an explicit site URL; on Vercel fall back to the deploy URL so metadata
+// never points at localhost in production.
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+
 export const metadata: Metadata = {
-  title: "Rent-tok — Find your room in Gangtok",
+  title: "RentTok — Find your room in Gangtok",
   description:
-    "Search verified rooms, PGs, flats and hostels for students across Gangtok, Sikkim. Book in minutes and contact owners directly.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+    "Search verified rooms, PGs, flats and hostels across Gangtok, Sikkim. Book in minutes and contact owners directly.",
+  metadataBase: new URL(siteUrl),
   manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, title: "Rent-tok", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: "RentTok", statusBarStyle: "default" },
   openGraph: {
-    title: "Rent-tok — Find your room in Gangtok",
-    description: "Rooms for students in Gangtok, searched and booked the easy way.",
+    title: "RentTok — Find your room in Gangtok",
+    description: "Rooms in Gangtok, searched and booked the easy way.",
     type: "website",
   },
 };

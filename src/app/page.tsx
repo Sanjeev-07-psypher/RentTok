@@ -37,7 +37,7 @@ export default async function Home() {
 
           <div className="flex flex-col items-center gap-6 py-14 text-center sm:py-24">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3.5 py-1.5 text-xs font-semibold text-[var(--muted)] shadow-[var(--shadow-sm)]">
-              <Sparkles size={13} className="text-[var(--primary)]" /> Now live for students in Gangtok
+              <Sparkles size={13} className="text-[var(--primary)]" /> Now live in Gangtok
             </span>
 
             <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-6xl">
@@ -45,8 +45,8 @@ export default async function Home() {
               <span className="text-[var(--primary)]">Gangtok</span>
             </h1>
             <p className="max-w-xl text-base text-[var(--muted)] sm:text-lg">
-              Rooms, PGs, flats and hostels for students — verified, searchable, and bookable in
-              minutes. Completely free — no brokerage, no booking fees.
+              Rooms, PGs, flats and hostels across Gangtok — verified, searchable, and easy to
+              reserve in minutes.
             </p>
 
             <HeroSearch />
@@ -71,7 +71,7 @@ export default async function Home() {
                 <HomeIcon size={16} className="text-[var(--primary)]" /> {AREAS.length}+ areas covered
               </span>
               <span className="flex items-center gap-1.5">
-                <KeyRound size={16} className="text-[var(--primary)]" /> No brokerage
+                <KeyRound size={16} className="text-[var(--primary)]" /> No middlemen
               </span>
             </div>
           </div>
@@ -103,8 +103,8 @@ export default async function Home() {
               </div>
               <p className="mt-4 text-lg font-semibold">No rooms listed yet</p>
               <p className="mt-1 max-w-sm text-sm text-[var(--muted)]">
-                Rent-tok is brand new in your area. Are you an owner? Be the first to list a room and
-                reach students looking right now.
+                RentTok is brand new in your area. Are you an owner? Be the first to list a room and
+                reach people looking right now.
               </p>
               <Link href="/owner/new" className="mt-5">
                 <Button>List your space</Button>
@@ -115,7 +115,7 @@ export default async function Home() {
 
         {/* How it works */}
         <section className="border-t border-[var(--border)] py-14">
-          <h2 className="text-center text-2xl font-bold tracking-tight">How Rent-tok works</h2>
+          <h2 className="text-center text-2xl font-bold tracking-tight">How RentTok works</h2>
           <p className="mx-auto mt-2 max-w-md text-center text-sm text-[var(--muted)]">
             From searching to keys in hand — three simple steps.
           </p>
@@ -123,14 +123,14 @@ export default async function Home() {
             <Step
               icon={<Search size={22} />}
               step="1"
-              title="Search for free"
+              title="Search & filter"
               body="Browse verified rooms by area, budget and amenities — no account needed to look around."
             />
             <Step
               icon={<KeyRound size={22} />}
               step="2"
-              title="Request for free"
-              body="Found the one? Send a free request to join the owner's queue instantly — no fees, no brokerage."
+              title="Send a request"
+              body="Found the one? Send a request to join the owner's queue instantly — connect directly, no middlemen."
             />
             <Step
               icon={<ShieldCheck size={22} />}

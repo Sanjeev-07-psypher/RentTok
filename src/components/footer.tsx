@@ -10,16 +10,16 @@ export function Footer() {
             Rent<span className="text-[var(--primary)]">Tok</span>
           </div>
           <p className="mt-3 max-w-xs text-sm text-[var(--muted)]">
-            Rooms for students in Gangtok - searched, verified, and booked the easy way.
+            Rooms across Gangtok - searched, verified, and booked the easy way.
           </p>
         </div>
-        <FooterCol title="Explore" links={[["Browse rooms", "/search"], ["About Rent-tok", "/about"], ["List your space", "/owner"]]} />
+        <FooterCol title="Explore" links={[["Browse rooms", "/search"], ["About RentTok", "/about"], ["List your space", "/owner"]]} />
         <FooterCol title="Support" links={[["Help & FAQ", "/help"], ["Contact us", "mailto:hello@rent-tok.in"]]} />
         <FooterCol title="Legal" links={[["Terms of Service", "/terms"], ["Privacy Policy", "/privacy"]]} />
       </div>
       <div className="border-t border-[var(--border)] py-5 text-center text-xs text-[var(--muted)]">
         <p className="font-medium text-[var(--foreground)]">
-          Built in the hills 🏔️ - by students, for students of Gangtok.
+          Built in the hills 🏔️ - made in Gangtok, Sikkim.
         </p>
         <p className="mt-1">
           © {new Date().getFullYear()} RentTok · Crafted with chai &amp; cold winters in Sikkim. · <TourLink />

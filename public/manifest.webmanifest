@@ -1,6 +1,6 @@
 {
-  "name": "Rent-tok — Rooms in Gangtok",
-  "short_name": "Rent-tok",
+  "name": "RentTok — Rooms in Gangtok",
+  "short_name": "RentTok",
   "description": "Find student rooms, PGs, flats and hostels across Gangtok — free.",
   "start_url": "/",
   "scope": "/",

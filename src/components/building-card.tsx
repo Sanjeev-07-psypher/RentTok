@@ -30,7 +30,7 @@ export function BuildingCard({ building, wishlisted }: { building: Building; wis
         ) : (
           <div className="grid h-full place-items-center bg-gradient-to-br from-[var(--surface-2)] to-[var(--surface)]">
             <span className="select-none text-3xl font-extrabold tracking-tight text-[var(--primary)]/35">
-              Rent-tok
+              RentTok
             </span>
           </div>
         )}

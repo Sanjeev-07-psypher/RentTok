@@ -4,7 +4,7 @@ import { SearchFilters } from "@/components/search-filters";
 import { NearMeButton } from "@/components/near-me-button";
 import { BuildingCard } from "@/components/building-card";
 
-export const metadata = { title: "Search rooms — Rent-tok" };
+export const metadata = { title: "Search rooms — RentTok" };
 
 export default async function SearchPage(props: PageProps<"/search">) {
   const sp = await props.searchParams;

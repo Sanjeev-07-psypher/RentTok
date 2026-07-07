@@ -5,7 +5,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { ConnectNotice } from "@/components/connect-notice";
 import { AadhaarVerifyForm } from "@/components/aadhaar-verify-form";
 
-export const metadata = { title: "Verify your identity — Rent-tok" };
+export const metadata = { title: "Verify your identity — RentTok" };
 
 export default async function VerifyPage() {
   if (!isSupabaseConfigured) return <ConnectNotice feature="Identity verification" />;

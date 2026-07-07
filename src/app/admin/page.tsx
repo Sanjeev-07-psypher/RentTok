@@ -11,7 +11,7 @@ import { BuildingReviewActions } from "@/components/building-review-actions";
 import { AadhaarReviewActions } from "@/components/aadhaar-review-actions";
 import type { Building, Profile, Booking } from "@/lib/types";
 
-export const metadata = { title: "Admin — Rent-tok" };
+export const metadata = { title: "Admin — RentTok" };
 
 type PendingBuilding = Building & { owner: { full_name: string | null; phone: string | null } | null };
 type BookingRow = Booking & { room: { title: string } | null; tenant: { full_name: string | null } | null };

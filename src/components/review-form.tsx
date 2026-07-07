@@ -56,7 +56,7 @@ export function ReviewForm({ roomId, initial }: { roomId: string; initial: Revie
         </div>
         <Textarea
           rows={3}
-          placeholder="Share your experience for other students…"
+          placeholder="Share your experience to help others…"
           value={body}
           onChange={(e) => setBody(e.target.value)}
         />

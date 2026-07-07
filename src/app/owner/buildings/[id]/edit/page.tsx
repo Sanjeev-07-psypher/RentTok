@@ -8,7 +8,7 @@ import { ConnectNotice } from "@/components/connect-notice";
 import { EditBuildingForm } from "@/components/edit-building-form";
 import type { Building } from "@/lib/types";
 
-export const metadata = { title: "Edit building — Rent-tok" };
+export const metadata = { title: "Edit building — RentTok" };
 
 export default async function EditBuildingPage(props: PageProps<"/owner/buildings/[id]/edit">) {
   if (!isSupabaseConfigured) return <ConnectNotice feature="Edit building" />;

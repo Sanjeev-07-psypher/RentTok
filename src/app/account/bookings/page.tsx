@@ -12,7 +12,7 @@ import { TenantBookingActions } from "@/components/tenant-booking-actions";
 import { CallButton } from "@/components/call-button";
 import type { Booking } from "@/lib/types";
 
-export const metadata = { title: "My bookings — Rent-tok" };
+export const metadata = { title: "My bookings — RentTok" };
 
 const statusColor: Record<string, string> = {
   queued: "text-[var(--primary)]",

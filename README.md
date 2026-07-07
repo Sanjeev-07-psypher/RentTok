@@ -1,32 +1,33 @@
-# Rent-tok 🏔️
+# RentTok 🏔️
 
-**Find your room in Gangtok — free.**
+**Find your room in Gangtok.**
 
-Rent-tok is a room-rental marketplace built for students in **Gangtok, Sikkim**. Browse
-verified rooms, PGs, flats and hostels, save your favourites, and request the one you
-like — all **completely free, with no brokerage and no booking fees**.
+RentTok is a room-rental marketplace for **Gangtok, Sikkim**. Browse verified rooms, PGs,
+flats and hostels, save your favourites, and request the one you like — quick, simple, and
+direct with owners.
 
-Built in the hills, by students, for students.
-
----
-
-## Why Rent-tok
-
-Every year students coming to Gangtok end up walking door-to-door looking for a place to
-stay. Rent-tok brings those rooms online — searchable, verified, and easy to reserve — so
-you can find a home before you even arrive.
+Whether you're a student, a working professional, or a family looking for a place — RentTok
+helps you find a home before you even arrive.
 
 ---
 
-## For students 🎓
+## Why RentTok
+
+Every year people coming to Gangtok end up walking door-to-door looking for a place to stay.
+RentTok brings those rooms online — searchable, verified, and easy to reserve — so you can
+find the right place without the hassle.
+
+---
+
+## For tenants 🔑
 
 - **Search & filter** — by area, budget (with a price slider), room type and amenities.
 - **Rooms near you** — share your location to see the closest stays first.
 - **Save & revisit** — add places to your **Wishlist** and find them again under **Recently viewed**.
 - **See real availability** — each room shows how many are free (e.g. "2 of 3 available").
-- **Request for free** — found the one? Send a free request to join the owner's queue.
+- **Request in one tap** — found the one? Send a request to join the owner's queue.
 - **Track your requests** — see status (in queue → accepted → confirmed) under **My bookings**.
-- **Reviews you can trust** — only students who actually stayed can review a room.
+- **Reviews you can trust** — only people who actually stayed can review a room.
 - **Notifications** — get updates when there's news on your requests.
 
 ## For owners 🏠
@@ -45,7 +46,7 @@ you can find a home before you even arrive.
 - **Identity verification** — owners and tenants can verify their identity with Aadhaar
   (uploaded privately, checked manually, and the document is deleted right after).
 - **Your privacy is protected** — your personal details stay on the platform; owners and
-  tenants connect through Rent-tok, not by handing out phone numbers to strangers.
+  tenants connect through RentTok, not by handing out numbers to strangers.
 
 ---
 
@@ -53,7 +54,7 @@ you can find a home before you even arrive.
 
 1. **Open the site** and start browsing — no account needed to look around.
 2. **Sign in** with your email (one-tap link) or Google when you want to save or request a room.
-3. **Add your details** once (name, age, contact, guardian) so owners can reach you.
+3. **Add your details** once so owners can reach you.
 4. **Verify your identity** to build trust with owners.
 5. **Request a room** — the owner reviews your request and connects with you to arrange a visit.
 
@@ -61,9 +62,9 @@ you can find a home before you even arrive.
 
 ## Install the app 📱
 
-Rent-tok works right in your browser and can be **installed like an app**:
+RentTok works right in your browser and can be **installed like an app**:
 
-- **Android / Chrome:** tap the **"Install Rent-tok"** prompt (or your browser's *Add to Home screen*).
+- **Android / Chrome:** tap the **"Install RentTok"** prompt (or your browser's *Add to Home screen*).
 - **iPhone / Safari:** tap **Share → Add to Home Screen**.
 
 You'll get a home-screen icon and a faster, full-screen experience.
@@ -77,4 +78,4 @@ You'll get a home-screen icon and a faster, full-screen experience.
 
 ---
 
-Rent-tok · Made in Gangtok, Sikkim. Free to use.
+RentTok · Made in Gangtok, Sikkim.
