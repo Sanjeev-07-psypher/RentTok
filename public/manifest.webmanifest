@@ -1,0 +1,15 @@
+{
+  "name": "Rent-tok — Rooms in Gangtok",
+  "short_name": "Rent-tok",
+  "description": "Find student rooms, PGs, flats and hostels across Gangtok — free.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#ff385c",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

@@ -1,0 +1,200 @@
+@import "tailwindcss";
+
+/* next-themes toggles a `.dark` class on <html>. This wires Tailwind's
+   `dark:` variant to that class instead of the OS media query. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------------------
+   Design tokens — Airbnb-inspired: warm white canvas, "Rausch" red accent.
+   Light is the default; .dark overrides below.
+--------------------------------------------------------------------------- */
+:root {
+  /* surfaces */
+  --background: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f7f7f7;
+  --border: #dddddd;
+
+  /* text */
+  --foreground: #222222;
+  --muted: #6a6a6a;
+
+  /* brand — Airbnb Rausch */
+  --primary: #ff385c;
+  --primary-hover: #e31c5f;
+  --primary-foreground: #ffffff;
+
+  /* states */
+  --ring: #ff385c;
+  --success: #008a05;
+  --danger: #c13515;
+
+  /* shape & elevation */
+  --radius-card: 1rem;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.07);
+}
+
+.dark {
+  --background: #0e0e10;
+  --surface: #1a1a1d;
+  --surface-2: #26262b;
+  --border: #2e2e34;
+
+  --foreground: #f2f2f3;
+  --muted: #9b9ba3;
+
+  --primary: #ff5a76;
+  --primary-hover: #ff385c;
+  --primary-foreground: #ffffff;
+
+  --ring: #ff5a76;
+  --success: #4ade80;
+  --danger: #f87171;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+
+/* Expose tokens to Tailwind's utility engine (bg-background, text-foreground…) */
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+
+  --shadow-card: var(--shadow-sm);
+  --shadow-card-hover: var(--shadow-md);
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+--------------------------------------------------------------------------- */
+* {
+  border-color: var(--border);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Smooth theme switching for color-bearing properties only (keeps it snappy) */
+body,
+.theme-transition {
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--primary) 24%, transparent);
+  color: var(--foreground);
+}
+
+/* Brand focus ring used app-wide via focus-visible:ring-[var(--ring)] */
+:focus-visible {
+  outline: none;
+}
+
+/* Tidy native scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 9999px;
+  border: 2px solid var(--background);
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+
+/* ---------------------------------------------------------------------------
+   Utilities
+--------------------------------------------------------------------------- */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Dual-handle price range slider — two stacked range inputs, thumbs clickable
+   while the tracks stay transparent so the styled track/range div shows through. */
+.dual-range {
+  -webkit-appearance: none;
+  appearance: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  background: transparent;
+  pointer-events: none;
+}
+.dual-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  pointer-events: auto;
+  height: 18px;
+  width: 18px;
+  border-radius: 9999px;
+  background: var(--primary);
+  border: 2px solid #fff;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+.dual-range::-moz-range-thumb {
+  pointer-events: auto;
+  height: 18px;
+  width: 18px;
+  border-radius: 9999px;
+  background: var(--primary);
+  border: 2px solid #fff;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+
+/* Subtle hover-lift for cards/listings */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Warm hero wash that reads on both themes */
+.brand-wash {
+  background:
+    radial-gradient(60% 120% at 85% 0%, color-mix(in srgb, var(--primary) 14%, transparent), transparent 60%),
+    radial-gradient(50% 100% at 0% 0%, color-mix(in srgb, var(--primary) 8%, transparent), transparent 55%);
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in 0.35s ease both;
+}
