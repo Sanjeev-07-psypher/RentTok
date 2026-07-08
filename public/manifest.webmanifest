@@ -1,7 +1,7 @@
 {
   "name": "RentTok — Rooms in Gangtok",
   "short_name": "RentTok",
-  "description": "Find student rooms, PGs, flats and hostels across Gangtok — free.",
+  "description": "Find rooms, PGs, flats and hostels across Gangtok.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -9,7 +9,9 @@
   "background_color": "#ffffff",
   "theme_color": "#ff385c",
   "icons": [
-    { "src": "/WebAppIcon.jpeg", "sizes": "635x697", "type": "image/jpeg", "purpose": "any" },
-    { "src": "/WebAppIcon.jpeg", "sizes": "635x697", "type": "image/jpeg", "purpose": "maskable" }
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
