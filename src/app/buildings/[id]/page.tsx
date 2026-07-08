@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { Star, MapPin, DoorOpen, CheckCircle2 } from "lucide-react";
+import { MapPin, DoorOpen, CheckCircle2 } from "lucide-react";
 import { getBuilding, getWishlistIds } from "@/lib/data";
-import { BUILDING_TYPES, ROOM_TYPES, AMENITIES } from "@/lib/constants";
+import { BUILDING_TYPES, AMENITIES, roomKindLabel } from "@/lib/constants";
 import { formatINR } from "@/lib/utils";
 import { Card } from "@/components/ui";
 import { AmenityIcon } from "@/components/amenity-icon";
@@ -58,12 +58,6 @@ export default async function BuildingPage(props: PageProps<"/buildings/[id]">) 
                 <CheckCircle2 size={14} /> Owner verified
               </span>
             )}
-            {building.rating != null && (
-              <span className="flex items-center gap-1 text-sm">
-                <Star size={15} className="fill-yellow-400 text-yellow-400" /> {building.rating}
-                <span className="text-[var(--muted)]">({building.review_count} reviews)</span>
-              </span>
-            )}
           </div>
 
           <div className="mt-3 flex items-start justify-between gap-4">
@@ -90,6 +84,13 @@ export default async function BuildingPage(props: PageProps<"/buildings/[id]">) 
               </div>
             </section>
           )}
+
+          {building.rules && (
+            <section className="mt-8">
+              <h2 className="text-lg font-bold">House rules</h2>
+              <p className="mt-2 whitespace-pre-line text-sm text-[var(--muted)]">{building.rules}</p>
+            </section>
+          )}
         </div>
 
         {/* Rooms list */}
@@ -107,7 +108,7 @@ export default async function BuildingPage(props: PageProps<"/buildings/[id]">) 
                 <p className="text-sm text-[var(--muted)]">No rooms have been added yet.</p>
               )}
               {rooms.map((room) => {
-                const roomTypeLabel = ROOM_TYPES.find((t) => t.value === room.type)?.label ?? room.type;
+                const roomTypeLabel = roomKindLabel(room);
                 const avail = room.available_units ?? 0;
                 const total = room.total_units ?? 1;
                 const isAvailable = avail > 0;

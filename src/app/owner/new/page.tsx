@@ -71,6 +71,7 @@ export default function NewBuildingPage() {
       address: fd.get("address"),
       contact_phone: fd.get("contact_phone"),
       description: fd.get("description"),
+      rules: fd.get("rules"),
       amenities,
       photoUrls: photos.filter((p) => p.url).map((p) => p.url),
     });
@@ -121,6 +122,9 @@ export default function NewBuildingPage() {
           </Field>
           <Field label="Description">
             <Textarea name="description" rows={4} placeholder="Describe the building, surroundings, who it suits…" />
+          </Field>
+          <Field label="House rules">
+            <Textarea name="rules" rows={3} placeholder="e.g. No smoking, gate closes at 10:30 PM, no loud music after 9 PM" />
           </Field>
         </Card>
 

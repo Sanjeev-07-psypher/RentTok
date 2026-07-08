@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button, Input, Textarea, Card } from "@/components/ui";
 import { saveTenantDetails } from "@/app/account/actions";
+import { requestBooking } from "@/app/bookings/actions";
 
 interface Initial {
   full_name?: string | null;
@@ -15,7 +16,15 @@ interface Initial {
   guardian_phone?: string | null;
 }
 
-export function TenantDetailsForm({ initial, next }: { initial: Initial; next?: string }) {
+export function TenantDetailsForm({
+  initial,
+  next,
+  bookRoomId,
+}: {
+  initial: Initial;
+  next?: string;
+  bookRoomId?: string;
+}) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
 
@@ -31,21 +40,40 @@ export function TenantDetailsForm({ initial, next }: { initial: Initial; next?: 
       guardian_name: fd.get("guardian_name"),
       guardian_phone: fd.get("guardian_phone"),
     });
-    setSubmitting(false);
-    if (res.ok) {
-      toast.success("Details saved");
-      router.push(next || "/account/bookings");
-      router.refresh();
-    } else {
+
+    if (!res.ok) {
+      setSubmitting(false);
       toast.error(res.error ?? "Could not save");
+      return;
     }
+
+    // Came here from a "Request to rent" click → save the details AND send the
+    // booking in one go, so the user never has to come back and click again.
+    if (bookRoomId) {
+      const booking = await requestBooking(bookRoomId);
+      setSubmitting(false);
+      if (booking.ok) {
+        toast.success("Saved and requested to book! The owner will reach out.");
+        router.push("/account/bookings");
+        router.refresh();
+      } else {
+        toast.error(booking.error);
+        router.push(`/rooms/${bookRoomId}`);
+      }
+      return;
+    }
+
+    setSubmitting(false);
+    toast.success("Details saved");
+    router.push(next || "/account/bookings");
+    router.refresh();
   }
 
   return (
     <form onSubmit={onSubmit} className="mt-8 space-y-6">
       <Card className="space-y-4 p-5">
         <Field label="Full name">
-          <Input name="full_name" required defaultValue={initial.full_name ?? ""} placeholder="As per Aadhaar" />
+          <Input name="full_name" required defaultValue={initial.full_name ?? ""} placeholder="As on your ID" />
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Age">
@@ -69,7 +97,13 @@ export function TenantDetailsForm({ initial, next }: { initial: Initial; next?: 
       </Card>
 
       <Button type="submit" size="lg" className="w-full" disabled={submitting}>
-        {submitting ? "Saving…" : "Save details"}
+        {submitting
+          ? bookRoomId
+            ? "Saving & requesting…"
+            : "Saving…"
+          : bookRoomId
+            ? "Save & request to rent"
+            : "Save details"}
       </Button>
     </form>
   );

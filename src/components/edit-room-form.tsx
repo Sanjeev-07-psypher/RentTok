@@ -3,17 +3,17 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ROOM_TYPES, AMENITIES } from "@/lib/constants";
-import { Button, Input, Textarea, Select, Card } from "@/components/ui";
+import { AMENITIES } from "@/lib/constants";
+import { Button, Input, Textarea, Card } from "@/components/ui";
 import { AmenityIcon } from "@/components/amenity-icon";
+import { BhkPicker } from "@/components/bhk-picker";
 import { updateRoom } from "@/app/owner/actions";
 import type { Room } from "@/lib/types";
-
-const UNIT_TYPES = ROOM_TYPES.filter((t) => t.value === "single" || t.value === "shared");
 
 export function EditRoomForm({ room }: { room: Room }) {
   const router = useRouter();
   const [amenities, setAmenities] = useState<string[]>(room.amenities ?? []);
+  const [bhk, setBhk] = useState(room.bhk && room.bhk > 0 ? room.bhk : 1);
   const [submitting, setSubmitting] = useState(false);
 
   const toggle = (v: string) =>
@@ -26,12 +26,11 @@ export function EditRoomForm({ room }: { room: Room }) {
     const res = await updateRoom({
       id: room.id,
       title: fd.get("title"),
-      type: fd.get("type"),
+      bhk,
       total_units: fd.get("total_units"),
       rent: fd.get("rent"),
       deposit: fd.get("deposit"),
       description: fd.get("description"),
-      rules: fd.get("rules"),
       amenities,
     });
     setSubmitting(false);
@@ -50,18 +49,12 @@ export function EditRoomForm({ room }: { room: Room }) {
         <Field label="Room label">
           <Input name="title" required defaultValue={room.title} />
         </Field>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Room type">
-            <Select name="type" required defaultValue={room.type === "shared" ? "shared" : "single"}>
-              {UNIT_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>{t.label}</option>
-              ))}
-            </Select>
-          </Field>
-          <Field label="How many identical rooms?">
-            <Input name="total_units" type="number" min={1} max={100} required defaultValue={room.total_units ?? 1} />
-          </Field>
-        </div>
+        <Field label="Room type (BHK)">
+          <BhkPicker value={bhk} onChange={setBhk} />
+        </Field>
+        <Field label="How many identical rooms of this type?">
+          <Input name="total_units" type="number" min={1} max={100} required defaultValue={room.total_units ?? 1} />
+        </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Rent (₹/month)">
             <Input name="rent" type="number" min={0} required defaultValue={room.rent} />
@@ -73,9 +66,9 @@ export function EditRoomForm({ room }: { room: Room }) {
         <Field label="Description">
           <Textarea name="description" rows={3} defaultValue={room.description ?? ""} />
         </Field>
-        <Field label="House rules">
-          <Textarea name="rules" rows={2} defaultValue={room.rules ?? ""} />
-        </Field>
+        <p className="text-xs text-[var(--muted)]">
+          House rules are set once on the building and apply to every room.
+        </p>
       </Card>
 
       <Card className="p-5">

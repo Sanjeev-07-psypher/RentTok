@@ -1,5 +1,6 @@
 import { Suspense } from "react";
-import { getBuildings, getWishlistIds } from "@/lib/data";
+import Link from "next/link";
+import { searchBuildings, getWishlistIds } from "@/lib/data";
 import { SearchFilters } from "@/components/search-filters";
 import { NearMeButton } from "@/components/near-me-button";
 import { BuildingCard } from "@/components/building-card";
@@ -15,10 +16,11 @@ export default async function SearchPage(props: PageProps<"/search">) {
   };
   const amenityRaw = sp.amenity;
   const amenities = Array.isArray(amenityRaw) ? amenityRaw : amenityRaw ? [amenityRaw] : [];
+  const q = get("q");
 
-  const [buildings, wishlistedIds] = await Promise.all([
-    getBuildings({
-      q: get("q"),
+  const [result, wishlistedIds] = await Promise.all([
+    searchBuildings({
+      q,
       type: get("type"),
       area: get("area"),
       minRent: get("minRent") ? Number(get("minRent")) : undefined,
@@ -30,12 +32,14 @@ export default async function SearchPage(props: PageProps<"/search">) {
     getWishlistIds(),
   ]);
 
+  const { buildings, fuzzy, suggestion } = result;
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">
-            {get("q") ? `Results for “${get("q")}”` : "Browse stays in Gangtok"}
+            {q ? `Results for “${q}”` : "Browse stays in Gangtok"}
           </h1>
           <p className="mt-1 text-sm text-[var(--muted)]">{buildings.length} buildings found</p>
         </div>
@@ -43,6 +47,21 @@ export default async function SearchPage(props: PageProps<"/search">) {
           <NearMeButton />
         </Suspense>
       </div>
+
+      {q && fuzzy && buildings.length > 0 && (
+        <div className="mt-4 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3 text-sm">
+          No exact match for <span className="font-medium">“{q}”</span> — showing related stays.
+          {suggestion && (
+            <>
+              {" "}Did you mean{" "}
+              <Link href={`/search?area=${encodeURIComponent(suggestion)}`} className="font-semibold text-[var(--primary)] hover:underline">
+                {suggestion}
+              </Link>
+              ?
+            </>
+          )}
+        </div>
+      )}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[280px_1fr]">
         <Suspense fallback={<div className="h-96 rounded-[var(--radius-card)] border border-[var(--border)]" />}>
@@ -58,8 +77,14 @@ export default async function SearchPage(props: PageProps<"/search">) {
         ) : (
           <div className="grid place-items-center rounded-[var(--radius-card)] border border-dashed border-[var(--border)] py-24 text-center text-[var(--muted)]">
             <div>
-              <p className="text-lg font-medium text-[var(--foreground)]">No buildings match your filters</p>
-              <p className="mt-1 text-sm">Try widening your search or clearing some filters.</p>
+              <p className="text-lg font-medium text-[var(--foreground)]">No stays listed yet</p>
+              <p className="mt-1 text-sm">
+                {suggestion ? (
+                  <>Try <Link href={`/search?area=${encodeURIComponent(suggestion)}`} className="text-[var(--primary)] hover:underline">{suggestion}</Link>, or clear some filters.</>
+                ) : (
+                  "Try widening your search or clearing some filters."
+                )}
+              </p>
             </div>
           </div>
         )}

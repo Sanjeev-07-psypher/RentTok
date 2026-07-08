@@ -15,10 +15,12 @@ export interface Building {
   address: string;
   city: string;
   contact_phone: string | null;
+  rules: string | null;
   lat: number | null;
   lng: number | null;
   amenities: AmenityValue[];
   status: ListingStatus;
+  active: boolean;
   owner_verified: boolean;
   owner_verified_at: string | null;
   rating: number | null;
@@ -64,7 +66,8 @@ export interface Room {
   owner_id: string;
   building_id: string | null;
   title: string;
-  type: RoomType;
+  type: RoomType | null;
+  bhk: number | null;
   description: string | null;
   area: string;
   address: string;
@@ -79,6 +82,7 @@ export interface Room {
   total_units: number;
   booked_units: number;
   status: ListingStatus;
+  active: boolean;
   rating: number | null;
   review_count: number;
   created_at: string;

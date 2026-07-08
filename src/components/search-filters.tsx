@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import {
   BUILDING_TYPES,
   AREAS,
@@ -17,13 +17,14 @@ import { Select, Button } from "./ui";
 export function SearchFilters() {
   const router = useRouter();
   const params = useSearchParams();
+  const [, startTransition] = useTransition();
 
   const setParam = useCallback(
     (key: string, value: string) => {
       const next = new URLSearchParams(params.toString());
       if (value) next.set(key, value);
       else next.delete(key);
-      router.push(`/search?${next.toString()}`);
+      startTransition(() => router.push(`/search?${next.toString()}`));
     },
     [params, router]
   );
@@ -35,22 +36,36 @@ export function SearchFilters() {
         if (value) next.set(key, value);
         else next.delete(key);
       }
-      router.push(`/search?${next.toString()}`);
+      startTransition(() => router.push(`/search?${next.toString()}`));
     },
     [params, router]
   );
 
+  // Amenity chips update instantly from local state; the URL (and DB re-query)
+  // is debounced so tapping several chips doesn't fire a round-trip each time.
+  const [amenitySel, setAmenitySel] = useState<string[]>(() => params.getAll("amenity"));
+  const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Keep local chips in sync when the URL changes elsewhere (Clear filters, nav).
+  useEffect(() => {
+    setAmenitySel(params.getAll("amenity"));
+  }, [params]);
+
   const toggleAmenity = (value: string) => {
-    const current = new Set(params.getAll("amenity"));
-    const next = new URLSearchParams(params.toString());
-    next.delete("amenity");
-    if (current.has(value)) current.delete(value);
-    else current.add(value);
-    current.forEach((a) => next.append("amenity", a));
-    router.push(`/search?${next.toString()}`);
+    setAmenitySel((prev) => {
+      const nextList = prev.includes(value) ? prev.filter((a) => a !== value) : [...prev, value];
+      if (debounce.current) clearTimeout(debounce.current);
+      debounce.current = setTimeout(() => {
+        const next = new URLSearchParams(params.toString());
+        next.delete("amenity");
+        nextList.forEach((a) => next.append("amenity", a));
+        startTransition(() => router.push(`/search?${next.toString()}`));
+      }, 300);
+      return nextList;
+    });
   };
 
-  const selectedAmenities = new Set(params.getAll("amenity"));
+  const selectedAmenities = new Set(amenitySel);
   const availableOnly = params.get("available") === "1";
 
   return (

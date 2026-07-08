@@ -9,7 +9,7 @@ import { formatINR, timeAgo } from "@/lib/utils";
 import { Card } from "@/components/ui";
 import { ConnectNotice } from "@/components/connect-notice";
 import { TenantBookingActions } from "@/components/tenant-booking-actions";
-import { CallButton } from "@/components/call-button";
+import { CallOwnerButton } from "@/components/call-owner-button";
 import type { Booking } from "@/lib/types";
 
 export const metadata = { title: "My bookings — RentTok" };
@@ -70,8 +70,8 @@ export default async function BookingsPage() {
                 </p>
               </div>
               <div className="flex flex-wrap items-center justify-end gap-2">
-                {(b.status === "accepted" || b.status === "confirmed") && (
-                  <CallButton bookingId={b.id} label="Call owner" enabled={isCallingConfigured} />
+                {["queued", "accepted", "confirmed"].includes(b.status) && (
+                  <CallOwnerButton bookingId={b.id} masked={isCallingConfigured} />
                 )}
                 <TenantBookingActions
                   bookingId={b.id}

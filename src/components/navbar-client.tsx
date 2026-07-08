@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { Search, Menu, X, LogOut, LayoutDashboard, Shield, CalendarCheck, Heart, History, BadgeCheck, Bell } from "lucide-react";
+import { Search, Menu, X, LogOut, LayoutDashboard, Shield, CalendarCheck, Heart, History, Bell } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { Button } from "./ui";
@@ -134,7 +134,6 @@ function UserMenu({ user, onSignOut, unreadCount }: { user: NavUser; onSignOut: 
             <MenuLink href="/account/bookings" icon={<CalendarCheck size={16} />} label="My bookings" onClick={() => setOpen(false)} />
             <MenuLink href="/account/wishlist" icon={<Heart size={16} />} label="Wishlist" onClick={() => setOpen(false)} />
             <MenuLink href="/account/history" icon={<History size={16} />} label="Recently viewed" onClick={() => setOpen(false)} />
-            <MenuLink href="/account/verify" icon={<BadgeCheck size={16} />} label="Verify identity" onClick={() => setOpen(false)} />
             <MenuLink href="/owner" icon={<LayoutDashboard size={16} />} label="Owner dashboard" onClick={() => setOpen(false)} />
             {user.isAdmin && (
               <MenuLink href="/admin" icon={<Shield size={16} />} label="Admin" onClick={() => setOpen(false)} />

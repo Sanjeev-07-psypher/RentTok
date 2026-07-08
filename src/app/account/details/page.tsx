@@ -12,6 +12,7 @@ export default async function DetailsPage(props: PageProps<"/account/details">) 
 
   const sp = await props.searchParams;
   const next = typeof sp.next === "string" ? sp.next : undefined;
+  const bookRoomId = typeof sp.book === "string" ? sp.book : undefined;
 
   const user = await getCurrentUser();
   if (!user) return <SignInPrompt />;
@@ -24,11 +25,14 @@ export default async function DetailsPage(props: PageProps<"/account/details">) 
         <UserCircle size={22} className="text-[var(--primary)]" /> Your details
       </h1>
       <p className="mt-1 text-sm text-[var(--muted)]">
-        We collect these once so owners can reach you and your guardian. You can update them anytime.
+        {bookRoomId
+          ? "One quick step — we save these once, then send your request straight away."
+          : "We collect these once so owners can reach you and your guardian. You can update them anytime."}
       </p>
 
       <TenantDetailsForm
         next={next}
+        bookRoomId={bookRoomId}
         initial={{
           full_name: p?.full_name,
           phone: p?.phone,

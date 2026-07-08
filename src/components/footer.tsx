@@ -14,7 +14,7 @@ export function Footer() {
           </p>
         </div>
         <FooterCol title="Explore" links={[["Browse rooms", "/search"], ["About RentTok", "/about"], ["List your space", "/owner"]]} />
-        <FooterCol title="Support" links={[["Help & FAQ", "/help"], ["Contact us", "mailto:hello@rent-tok.in"]]} />
+        <FooterCol title="Support" links={[["Help & FAQ", "/help"], ["Feedback & support us", "/feedback"], ["Contact us", "mailto:hello@rent-tok.in"]]} />
         <FooterCol title="Legal" links={[["Terms of Service", "/terms"], ["Privacy Policy", "/privacy"]]} />
       </div>
       <div className="border-t border-[var(--border)] py-5 text-center text-xs text-[var(--muted)]">

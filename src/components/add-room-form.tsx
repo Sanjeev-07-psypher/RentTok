@@ -7,18 +7,16 @@ import { toast } from "sonner";
 import { ImagePlus, X, ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { ROOM_TYPES, AMENITIES } from "@/lib/constants";
-import { Button, Input, Textarea, Select, Card } from "@/components/ui";
+import { AMENITIES } from "@/lib/constants";
+import { Button, Input, Textarea, Card } from "@/components/ui";
 import { AmenityIcon } from "@/components/amenity-icon";
+import { BhkPicker } from "@/components/bhk-picker";
 import { addRoom } from "@/app/owner/actions";
 
 interface Photo {
   url: string;
   uploading: boolean;
 }
-
-// Only single/shared are valid room-unit kinds.
-const UNIT_TYPES = ROOM_TYPES.filter((t) => t.value === "single" || t.value === "shared");
 
 export function AddRoomForm({
   buildingId,
@@ -31,6 +29,7 @@ export function AddRoomForm({
 }) {
   const router = useRouter();
   const [amenities, setAmenities] = useState<string[]>([]);
+  const [bhk, setBhk] = useState(1);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [added, setAdded] = useState(0);
@@ -81,12 +80,11 @@ export function AddRoomForm({
     const result = await addRoom({
       building_id: buildingId,
       title: fd.get("title"),
-      type: fd.get("type"),
+      bhk,
       total_units: fd.get("total_units"),
       rent: fd.get("rent"),
       deposit: fd.get("deposit"),
       description: fd.get("description"),
-      rules: fd.get("rules"),
       amenities,
       photoUrls: photos.filter((p) => p.url).map((p) => p.url),
     });
@@ -96,6 +94,7 @@ export function AddRoomForm({
       toast.success("Room added.");
       setAdded((n) => n + 1);
       setAmenities([]);
+      setBhk(1);
       setPhotos([]);
       setFormKey((k) => k + 1);
     } else {
@@ -114,20 +113,14 @@ export function AddRoomForm({
       <form key={formKey} onSubmit={onSubmit} className="mt-8 space-y-6">
         <Card className="space-y-4 p-5">
           <Field label="Room label">
-            <Input name="title" required placeholder="e.g. Single Room · 1st floor" />
+            <Input name="title" required placeholder="e.g. 2 BHK · 1st floor" />
           </Field>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Room type">
-              <Select name="type" required defaultValue="single">
-                {UNIT_TYPES.map((t) => (
-                  <option key={t.value} value={t.value}>{t.label}</option>
-                ))}
-              </Select>
-            </Field>
-            <Field label="How many identical rooms?">
-              <Input name="total_units" type="number" min={1} max={100} required defaultValue={1} />
-            </Field>
-          </div>
+          <Field label="Room type (BHK)">
+            <BhkPicker value={bhk} onChange={setBhk} />
+          </Field>
+          <Field label="How many identical rooms of this type?">
+            <Input name="total_units" type="number" min={1} max={100} required defaultValue={1} />
+          </Field>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Rent (₹/month)">
               <Input name="rent" type="number" required min={0} placeholder="6000" />
@@ -139,9 +132,9 @@ export function AddRoomForm({
           <Field label="Description">
             <Textarea name="description" rows={3} placeholder="Anything specific to this room…" />
           </Field>
-          <Field label="House rules">
-            <Textarea name="rules" rows={2} placeholder="e.g. No smoking, gate closes at 10:30 PM" />
-          </Field>
+          <p className="text-xs text-[var(--muted)]">
+            House rules are set once on the building and apply to every room.
+          </p>
         </Card>
 
         <Card className="p-5">

@@ -2,7 +2,8 @@ import "server-only";
 import { createServerSupabase } from "./supabase/server";
 import { isSupabaseConfigured } from "./supabase/config";
 import { SAMPLE_ROOMS, SAMPLE_BUILDINGS } from "./sample-data";
-import { distanceKm } from "./utils";
+import { distanceKm, fuzzyScore, normalizeText } from "./utils";
+import { AREAS } from "./constants";
 import type { Room, Building, Notification, Review } from "./types";
 
 // ---------------------------------------------------------------------------
@@ -27,8 +28,11 @@ function availableUnits(r: Room): number {
 }
 
 // Fill the derived fields (counts are in UNITS across all room types) from nested rooms.
+// Paused (inactive) rooms are dropped so they never surface on public pages.
 function withAggregates(b: Building, lat?: number, lng?: number): Building {
-  const rooms = (b.rooms ?? []).map((r) => ({ ...r, available_units: availableUnits(r) }));
+  const rooms = (b.rooms ?? [])
+    .filter((r) => r.active !== false)
+    .map((r) => ({ ...r, available_units: availableUnits(r) }));
   const rents = rooms.map((r) => r.rent);
   const distance_km =
     lat != null && lng != null && b.lat != null && b.lng != null
@@ -98,7 +102,8 @@ export async function getBuildings(filters: BuildingFilters = {}): Promise<Build
   let query = supabase
     .from("buildings")
     .select("*, photos:building_photos(*), rooms(*)")
-    .eq("status", "approved");
+    .eq("status", "approved")
+    .eq("active", true);
 
   if (filters.q)
     query = query.or(`name.ilike.%${filters.q}%,area.ilike.%${filters.q}%,address.ilike.%${filters.q}%`);
@@ -117,8 +122,64 @@ export async function getBuildings(filters: BuildingFilters = {}): Promise<Build
 }
 
 export async function getFeaturedBuildings(): Promise<Building[]> {
-  const buildings = await getBuildings({ sort: "rating" });
+  const buildings = await getBuildings({ sort: "newest" });
   return buildings.slice(0, 8);
+}
+
+// ---------------------------------------------------------------------------
+// Typo-tolerant search. Non-`q` filters run in SQL; the free-text query is
+// matched fuzzily in JS so misspellings ("tedon" → Tadong) still return cards.
+// Never dead-ends: when nothing matches well, returns related stays + a "did
+// you mean" area suggestion.
+// ---------------------------------------------------------------------------
+export interface SearchResult {
+  buildings: Building[];
+  fuzzy: boolean; // true when results were broadened past an exact match
+  suggestion?: string; // nearest area name for a "did you mean" hint
+  query?: string;
+}
+
+function bestAreaMatch(q: string): string | undefined {
+  let best: { area: string; score: number } | undefined;
+  for (const area of AREAS) {
+    const score = fuzzyScore(q, area);
+    if (!best || score > best.score) best = { area, score };
+  }
+  if (best && best.score >= 0.5 && normalizeText(best.area) !== normalizeText(q)) {
+    return best.area;
+  }
+  return undefined;
+}
+
+export async function searchBuildings(filters: BuildingFilters): Promise<SearchResult> {
+  const q = filters.q?.trim();
+  // Let the DB handle every filter except the free-text query.
+  const base = await getBuildings({ ...filters, q: undefined });
+
+  if (!q) return { buildings: base, fuzzy: false };
+
+  const scored = base
+    .map((b) => ({
+      b,
+      score: Math.max(fuzzyScore(q, b.name), fuzzyScore(q, b.area), fuzzyScore(q, b.address ?? "")),
+    }))
+    .sort((x, y) => y.score - x.score);
+
+  const strong = scored.filter((s) => s.score >= 0.6).map((s) => s.b);
+  if (strong.length) {
+    const fuzzy = scored[0].score < 1; // top hit is a near-miss, not exact
+    return {
+      buildings: sortBuildings(strong, filters),
+      fuzzy,
+      suggestion: fuzzy ? bestAreaMatch(q) : undefined,
+      query: q,
+    };
+  }
+
+  // Nothing matched well — show the closest related stays rather than nothing.
+  const related = scored.filter((s) => s.score >= 0.3).map((s) => s.b);
+  const fallback = related.length ? related : base.slice(0, 9);
+  return { buildings: fallback, fuzzy: true, suggestion: bestAreaMatch(q), query: q };
 }
 
 export async function getBuilding(id: string): Promise<Building | null> {
@@ -296,5 +357,9 @@ export async function getRoom(id: string): Promise<Room | null> {
     return null;
   }
   const room = data as Room;
+  // Hide rooms whose parent building isn't publicly visible. RLS nulls the join
+  // for a paused/unapproved building (unless the viewer owns it), so a missing
+  // building on a room that has a building_id means it's not public.
+  if (room.building_id && !room.building) return null;
   return { ...room, available_units: availableUnits(room) };
 }
