@@ -6,6 +6,46 @@ import { isCallingConfigured, placeMaskedCall, EXOTEL_CALLBACK_SECRET } from "@/
 import { logEvent } from "@/lib/events";
 
 type Result = { ok: true } | { ok: false; error: string };
+type RevealResult = { ok: true; phone: string } | { ok: false; error: string };
+
+// v1 fallback until Exotel masking is live: a tenant who has an active request
+// for a room may see the owner's real contact number to call them directly.
+// The number is revealed ONLY to the requesting tenant, server-side.
+export async function revealOwnerPhone(bookingId: string): Promise<RevealResult> {
+  const supabase = await createServerSupabase();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Please sign in." };
+
+  const admin = createAdminClient();
+  const { data: booking } = await admin
+    .from("bookings")
+    .select("tenant_id, status, room:rooms(owner_id, building:buildings(contact_phone))")
+    .eq("id", bookingId)
+    .single();
+
+  const b = booking as unknown as {
+    tenant_id: string;
+    status: string;
+    room: { owner_id: string; building: { contact_phone: string | null } | null } | null;
+  } | null;
+  if (!b?.room) return { ok: false, error: "Booking not found." };
+  if (b.tenant_id !== user.id) return { ok: false, error: "Not your booking." };
+  if (!["queued", "accepted", "confirmed"].includes(b.status)) {
+    return { ok: false, error: "This request is no longer active." };
+  }
+
+  // Prefer the building's listed contact; fall back to the owner's profile phone.
+  let phone = b.room.building?.contact_phone ?? null;
+  if (!phone) {
+    const { data: owner } = await admin.from("profiles").select("phone").eq("id", b.room.owner_id).single();
+    phone = owner?.phone ?? null;
+  }
+  if (!phone) return { ok: false, error: "The owner hasn't shared a number yet." };
+
+  return { ok: true, phone };
+}
 
 // Start a masked call for a booking. The caller's own phone rings first, then
 // Exotel bridges to the other party — neither sees the other's real number.

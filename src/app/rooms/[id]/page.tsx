@@ -1,29 +1,25 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { Star, MapPin, BadgeCheck, DoorOpen, ArrowLeft } from "lucide-react";
-import { getRoom, getRoomReviews, getReviewContext } from "@/lib/data";
+import { MapPin, BadgeCheck, DoorOpen, ArrowLeft } from "lucide-react";
+import { getRoom } from "@/lib/data";
 import { getCurrentUser, tenantDetailsComplete } from "@/lib/auth";
-import { ROOM_TYPES, AMENITIES } from "@/lib/constants";
+import { AMENITIES, roomKindLabel } from "@/lib/constants";
 import { formatINR } from "@/lib/utils";
 import { Card } from "@/components/ui";
 import { AmenityIcon } from "@/components/amenity-icon";
 import { RequestToRent } from "@/components/request-to-rent";
-import { ReviewForm } from "@/components/review-form";
-import { ReviewList } from "@/components/review-list";
 
 export default async function RoomPage(props: PageProps<"/rooms/[id]">) {
   const { id } = await props.params;
-  const [room, user, reviews, reviewCtx] = await Promise.all([
-    getRoom(id),
-    getCurrentUser(),
-    getRoomReviews(id),
-    getReviewContext(id),
-  ]);
+  const [room, user] = await Promise.all([getRoom(id), getCurrentUser()]);
 
   if (!room) notFound();
+  // Hide paused rooms (or rooms under a paused building) from the public.
+  if (room.active === false || room.building?.active === false) notFound();
 
-  const typeLabel = ROOM_TYPES.find((t) => t.value === room.type)?.label ?? room.type;
+  const typeLabel = roomKindLabel(room);
+  const rules = room.building?.rules ?? null;
   const amenityLabels = AMENITIES.filter((a) => room.amenities.includes(a.value));
   const photos = room.photos ?? [];
   const available = room.available_units ?? 0;
@@ -73,12 +69,6 @@ export default async function RoomPage(props: PageProps<"/rooms/[id]">) {
             <span className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${isFull ? "bg-[var(--surface-2)] text-[var(--muted)]" : "bg-green-500/15 text-green-600 dark:text-green-400"}`}>
               <DoorOpen size={13} /> {isFull ? "Fully booked" : `${available} of ${total} available`}
             </span>
-            {room.rating != null && (
-              <span className="flex items-center gap-1 text-sm">
-                <Star size={15} className="fill-yellow-400 text-yellow-400" /> {room.rating}
-                <span className="text-[var(--muted)]">({room.review_count} reviews)</span>
-              </span>
-            )}
           </div>
 
           <h1 className="mt-3 text-3xl font-extrabold">{room.title}</h1>
@@ -101,24 +91,12 @@ export default async function RoomPage(props: PageProps<"/rooms/[id]">) {
             </div>
           </section>
 
-          {room.rules && (
+          {rules && (
             <section className="mt-8">
               <h2 className="text-lg font-bold">House rules</h2>
-              <p className="mt-2 whitespace-pre-line text-sm text-[var(--muted)]">{room.rules}</p>
+              <p className="mt-2 whitespace-pre-line text-sm text-[var(--muted)]">{rules}</p>
             </section>
           )}
-
-          <section className="mt-8">
-            <h2 className="text-lg font-bold">Reviews</h2>
-            {reviewCtx.canReview && (
-              <div className="mt-3">
-                <ReviewForm roomId={room.id} initial={reviewCtx.myReview} />
-              </div>
-            )}
-            <div className="mt-4">
-              <ReviewList reviews={reviews} />
-            </div>
-          </section>
         </div>
 
         {/* Booking card */}

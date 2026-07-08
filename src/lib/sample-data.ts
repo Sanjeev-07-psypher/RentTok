@@ -4,11 +4,14 @@ import type { Room, Building } from "./types";
 const now = new Date().toISOString();
 
 function room(
-  r: Omit<Room, "city" | "status" | "availability" | "photos" | "total_units" | "booked_units"> & Partial<Room>
+  r: Omit<Room, "city" | "status" | "active" | "bhk" | "availability" | "photos" | "total_units" | "booked_units"> &
+    Partial<Room>
 ): Room {
   return {
     city: "Gangtok",
     status: "approved",
+    active: true,
+    bhk: null,
     availability: "available",
     total_units: 1,
     booked_units: 0,
@@ -24,14 +27,14 @@ export const SAMPLE_ROOMS: Room[] = [
     description: "Bright, quiet single room with a study desk and a great valley view.",
     area: "Tadong", address: "Near Tadong College, Tadong", lat: 27.305, lng: 88.61,
     rent: 6000, deposit: 6000, rules: "No smoking. Gate closes at 10:30 PM.",
-    amenities: ["wifi", "geyser", "study_table", "drinking_water"], rating: 4.8, review_count: 120, created_at: now,
+    amenities: ["wifi", "geyser", "study_table", "water_247"], rating: 4.8, review_count: 120, created_at: now,
   }),
   room({
     id: "sample-1b", owner_id: "demo-owner", building_id: "b-1",
     title: "Twin Sharing · 2nd floor", type: "shared",
     description: "Twin-sharing room, ideal to split rent with a friend.",
     area: "Tadong", address: "Near Tadong College, Tadong", lat: 27.305, lng: 88.61,
-    rent: 4500, deposit: 4500, rules: "No smoking.", amenities: ["wifi", "geyser", "drinking_water"],
+    rent: 4500, deposit: 4500, rules: "No smoking.", amenities: ["wifi", "geyser", "water_247"],
     availability: "booked", rating: 4.6, review_count: 40, created_at: now,
   }),
   room({
@@ -73,18 +76,20 @@ export const SAMPLE_ROOMS: Room[] = [
     description: "Affordable hostel bed in a 4-sharing dorm. Mess food available.",
     area: "Ranipool", address: "Ranipool, Gangtok", lat: 27.29, lng: 88.59,
     rent: 4000, deposit: 3000, rules: "Lights off by 11 PM.",
-    amenities: ["wifi", "food", "drinking_water", "laundry"], rating: 4.3, review_count: 33, created_at: now,
+    amenities: ["wifi", "food", "water_247", "laundry"], rating: 4.3, review_count: 33, created_at: now,
   }),
 ];
 
 function building(
-  b: Omit<Building, "city" | "status" | "owner_verified" | "owner_verified_at" | "photos" | "contact_phone">
+  b: Omit<Building, "city" | "status" | "active" | "rules" | "owner_verified" | "owner_verified_at" | "photos" | "contact_phone">
 ): Building {
   const rooms = SAMPLE_ROOMS.filter((r) => r.building_id === b.id);
   const available = rooms.filter((r) => r.availability === "available");
   return {
     city: "Gangtok",
     status: "approved",
+    active: true,
+    rules: "No smoking indoors. Keep common areas clean.",
     owner_verified: true,
     owner_verified_at: now,
     contact_phone: "9800000000",
@@ -102,7 +107,7 @@ export const SAMPLE_BUILDINGS: Building[] = [
     id: "b-1", owner_id: "demo-owner", name: "Valley View Residency", type: "pg",
     description: "A comfortable PG a short walk from Tadong, with single and sharing rooms.",
     area: "Tadong", address: "Near Tadong College, Tadong", lat: 27.305, lng: 88.61,
-    amenities: ["wifi", "geyser", "study_table", "drinking_water"], rating: 4.8, review_count: 160, created_at: now,
+    amenities: ["wifi", "geyser", "study_table", "water_247"], rating: 4.8, review_count: 160, created_at: now,
   }),
   building({
     id: "b-2", owner_id: "demo-owner", name: "Himalayan Girls PG", type: "pg",
@@ -126,6 +131,6 @@ export const SAMPLE_BUILDINGS: Building[] = [
     id: "b-5", owner_id: "demo-owner", name: "Ranipool Boys Hostel", type: "hostel",
     description: "Budget hostel beds with mess — clean, simple and great value.",
     area: "Ranipool", address: "Ranipool, Gangtok", lat: 27.29, lng: 88.59,
-    amenities: ["wifi", "food", "drinking_water", "laundry"], rating: 4.3, review_count: 33, created_at: now,
+    amenities: ["wifi", "food", "water_247", "laundry"], rating: 4.3, review_count: 33, created_at: now,
   }),
 ];

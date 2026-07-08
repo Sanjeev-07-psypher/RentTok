@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logEvent } from "@/lib/events";
+import { notifyUser } from "@/lib/notify";
 import { requireAadhaar } from "@/lib/supabase/config";
 import { tenantDetailsComplete } from "@/lib/auth";
 import type { Profile } from "@/lib/types";
@@ -42,7 +43,7 @@ export async function requestBooking(roomId: string): Promise<RequestResult> {
   // Room must be live and have a free unit.
   const { data: room } = await admin
     .from("rooms")
-    .select("id, status, total_units, booked_units")
+    .select("id, status, total_units, booked_units, owner_id, title")
     .eq("id", roomId)
     .single();
   if (!room || room.status !== "approved") return { ok: false, error: "Room is not available." };
@@ -84,6 +85,12 @@ export async function requestBooking(roomId: string): Promise<RequestResult> {
     entity: "booking",
     entityId: booking.id,
     meta: { room_id: roomId, queue_position: (count ?? 0) + 1, free: true },
+  });
+  await notifyUser({
+    userId: room.owner_id,
+    type: "booking_request",
+    title: "New room request",
+    body: `Someone requested "${room.title}". Review it in your dashboard.`,
   });
   revalidate();
   return { ok: true, bookingId: booking.id };
@@ -129,6 +136,12 @@ export async function acceptBooking(bookingId: string): Promise<Result> {
   if (error) return { ok: false, error: error.message };
 
   await logEvent({ type: "booking_accepted", actorId: uid, entity: "booking", entityId: bookingId, meta: { room_id: booking.room_id } });
+  await notifyUser({
+    userId: booking.tenant_id,
+    type: "booking_accepted",
+    title: "Your request was accepted 🎉",
+    body: "The owner accepted your request. Confirm to lock your room, and you can call them now.",
+  });
   revalidate();
   return { ok: true };
 }
@@ -152,6 +165,12 @@ export async function rejectBooking(bookingId: string): Promise<Result> {
     .in("status", ["queued", "accepted"]);
 
   await logEvent({ type: "booking_rejected", actorId: uid, entity: "booking", entityId: bookingId });
+  await notifyUser({
+    userId: booking.tenant_id,
+    type: "booking_rejected",
+    title: "Request not selected",
+    body: "The owner didn't select your request this time. Keep exploring other rooms on RentTok.",
+  });
   revalidate();
   return { ok: true };
 }
@@ -175,6 +194,14 @@ export async function cancelBooking(bookingId: string): Promise<Result> {
     .in("status", ["queued", "accepted"]);
 
   await logEvent({ type: "booking_cancelled", actorId: uid, entity: "booking", entityId: bookingId });
+  if (booking.room) {
+    await notifyUser({
+      userId: booking.room.owner_id,
+      type: "booking_cancelled",
+      title: "A request was cancelled",
+      body: "A tenant cancelled their request. Their spot has opened up in your queue.",
+    });
+  }
   revalidate();
   return { ok: true };
 }
@@ -219,6 +246,13 @@ export async function confirmBooking(bookingId: string): Promise<Result> {
       entityId: bookingId,
       meta: { by: isOwner ? "owner" : "tenant" },
     });
+    // Nudge the other party that it's their turn to confirm.
+    await notifyUser({
+      userId: isOwner ? booking.tenant_id : booking.room.owner_id,
+      type: "booking_confirm_pending",
+      title: "One more step to lock the room",
+      body: `${isOwner ? "The owner" : "The tenant"} confirmed the match — confirm from your side to lock it in.`,
+    });
     revalidate();
     return { ok: true };
   }
@@ -257,7 +291,20 @@ export async function confirmBooking(bookingId: string): Promise<Result> {
       .in("status", ["queued", "accepted"]);
 
     for (const other of others ?? []) {
-      await admin.from("bookings").update({ status: "refunded", cancelled_by: "system" }).eq("id", other.id);
+      const { data: rel } = await admin
+        .from("bookings")
+        .update({ status: "refunded", cancelled_by: "system" })
+        .eq("id", other.id)
+        .select("tenant_id")
+        .single();
+      if (rel?.tenant_id) {
+        await notifyUser({
+          userId: rel.tenant_id,
+          type: "booking_released",
+          title: "Room filled",
+          body: "This room type just filled up, so your request was released. Explore other rooms on RentTok.",
+        });
+      }
       releasedOthers++;
     }
   }
@@ -268,6 +315,19 @@ export async function confirmBooking(bookingId: string): Promise<Result> {
     entity: "booking",
     entityId: bookingId,
     meta: { room_id: booking.room_id, unit: booked, total_units: totalUnits, full, released_others: releasedOthers },
+  });
+  // Both sides are now locked in — tell each of them.
+  await notifyUser({
+    userId: booking.tenant_id,
+    type: "booking_confirmed",
+    title: "Booking confirmed 🎉",
+    body: "You're all set — the room is locked in. The owner has your details to coordinate move-in.",
+  });
+  await notifyUser({
+    userId: booking.room.owner_id,
+    type: "booking_confirmed",
+    title: "Booking confirmed 🎉",
+    body: "The match is locked in. Reach out to your new tenant to coordinate move-in.",
   });
   revalidate();
   return { ok: true };

@@ -29,6 +29,7 @@ export function EditBuildingForm({ building }: { building: Building }) {
       address: fd.get("address"),
       contact_phone: fd.get("contact_phone"),
       description: fd.get("description"),
+      rules: fd.get("rules"),
       amenities,
     });
     setSubmitting(false);
@@ -71,6 +72,14 @@ export function EditBuildingForm({ building }: { building: Building }) {
         </Field>
         <Field label="Description">
           <Textarea name="description" rows={4} defaultValue={building.description ?? ""} />
+        </Field>
+        <Field label="House rules">
+          <Textarea
+            name="rules"
+            rows={3}
+            defaultValue={building.rules ?? ""}
+            placeholder="e.g. No smoking, gate closes at 10:30 PM"
+          />
         </Field>
       </Card>
 

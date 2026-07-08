@@ -2,7 +2,9 @@ import {
   Wifi,
   Snowflake,
   Utensils,
+  CookingPot,
   Droplets,
+  GlassWater,
   Car,
   WashingMachine,
   Zap,
@@ -10,7 +12,6 @@ import {
   Bath,
   BookOpen,
   Cctv,
-  GlassWater,
   Check,
 } from "lucide-react";
 import type { ComponentType } from "react";
@@ -21,7 +22,9 @@ const ICONS: Record<string, IconCmp> = {
   wifi: Wifi,
   ac: Snowflake,
   food: Utensils,
+  attached_kitchen: CookingPot,
   geyser: Droplets,
+  water_247: GlassWater,
   parking: Car,
   laundry: WashingMachine,
   power_backup: Zap,
@@ -29,7 +32,6 @@ const ICONS: Record<string, IconCmp> = {
   attached_bathroom: Bath,
   study_table: BookOpen,
   cctv: Cctv,
-  drinking_water: GlassWater,
 };
 
 export function AmenityIcon({

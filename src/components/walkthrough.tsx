@@ -28,13 +28,7 @@ const steps = [
   {
     popover: {
       title: "Send a request",
-      description: "Found a room? Send a request to join the owner’s queue — they’ll reach out to you directly.",
-    },
-  },
-  {
-    popover: {
-      title: "Aadhaar verification is required ✅",
-      description: "To keep everyone safe, verifying your Aadhaar is mandatory before you can book or list. It’s a one-time step under Account → Verify identity.",
+      description: "Found a room? Send a request to join the owner’s queue — they’ll reach out to you directly, and you can call them once you’ve requested.",
     },
   },
   {

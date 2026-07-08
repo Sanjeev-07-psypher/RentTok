@@ -20,6 +20,17 @@ export const ROOM_TYPES = [
 
 export type RoomType = (typeof ROOM_TYPES)[number]["value"];
 
+// Rooms are now described by BHK. Owners pick 1/2/3 or enter a custom count (4+).
+export const BHK_PRESETS = [1, 2, 3] as const;
+
+// Display label for a room: prefer its BHK; fall back to the legacy single/shared
+// type for listings created before the BHK switch.
+export function roomKindLabel(room: { bhk?: number | null; type?: string | null }): string {
+  if (room.bhk && room.bhk > 0) return `${room.bhk} BHK`;
+  const legacy = ROOM_TYPES.find((t) => t.value === room.type);
+  return legacy?.label ?? room.type ?? "Room";
+}
+
 export const AVAILABILITY = {
   available: "Available",
   booked: "Booked",
@@ -32,7 +43,6 @@ export const SORT_OPTIONS = [
   { value: "newest", label: "Newest" },
   { value: "price_asc", label: "Price: low to high" },
   { value: "price_desc", label: "Price: high to low" },
-  { value: "rating", label: "Top rated" },
   { value: "nearest", label: "Nearest to me" },
 ] as const;
 
@@ -47,7 +57,9 @@ export const AMENITIES = [
   { value: "wifi", label: "WiFi" },
   { value: "ac", label: "AC" },
   { value: "food", label: "Food / Mess" },
+  { value: "attached_kitchen", label: "Attached Kitchen" },
   { value: "geyser", label: "Hot Water" },
+  { value: "water_247", label: "24/7 Water" },
   { value: "parking", label: "Parking" },
   { value: "laundry", label: "Laundry" },
   { value: "power_backup", label: "Power Backup" },
@@ -55,7 +67,6 @@ export const AMENITIES = [
   { value: "attached_bathroom", label: "Attached Bathroom" },
   { value: "study_table", label: "Study Table" },
   { value: "cctv", label: "CCTV" },
-  { value: "drinking_water", label: "Drinking Water" },
 ] as const;
 
 export type AmenityValue = (typeof AMENITIES)[number]["value"];

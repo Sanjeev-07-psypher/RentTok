@@ -7,6 +7,7 @@ import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { InstallPrompt } from "@/components/install-prompt";
 import { Walkthrough } from "@/components/walkthrough";
+import { FeedbackPrompt } from "@/components/feedback-prompt";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 
@@ -51,6 +52,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <Footer />
           <InstallPrompt />
           <Walkthrough />
+          <FeedbackPrompt />
         </Providers>
       </body>
     </html>

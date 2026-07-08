@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Star, MapPin, DoorOpen } from "lucide-react";
+import { MapPin, DoorOpen } from "lucide-react";
 import type { Building } from "@/lib/types";
 import { formatINR, formatDistance } from "@/lib/utils";
 import { BUILDING_TYPES } from "@/lib/constants";
@@ -38,12 +38,6 @@ export function BuildingCard({ building, wishlisted }: { building: Building; wis
         <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-xs font-semibold text-[#222] shadow-sm">
           {typeLabel}
         </span>
-
-        {building.rating != null && (
-          <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-xs font-semibold text-[#222] shadow-sm">
-            <Star size={12} className="fill-[var(--primary)] text-[var(--primary)]" /> {building.rating}
-          </span>
-        )}
 
         <WishlistButton buildingId={building.id} initial={wishlisted} />
       </div>

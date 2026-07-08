@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { Shield, BadgeCheck, Users, Activity, PhoneCall } from "lucide-react";
+import { Shield, BadgeCheck, Users, Activity, PhoneCall, MessageSquare } from "lucide-react";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getCurrentUser } from "@/lib/auth";
@@ -16,6 +16,7 @@ export const metadata = { title: "Admin — RentTok" };
 type PendingBuilding = Building & { owner: { full_name: string | null; phone: string | null } | null };
 type BookingRow = Booking & { room: { title: string } | null; tenant: { full_name: string | null } | null };
 type EventRow = { id: string; type: string; entity: string | null; created_at: string };
+type FeedbackRow = { id: string; name: string | null; category: string | null; message: string; created_at: string };
 type CallRow = {
   id: string;
   initiated_by: string;
@@ -45,6 +46,7 @@ export default async function AdminPage() {
     { data: recentBookings },
     { data: events },
     { data: calls },
+    { data: feedback },
   ] = await Promise.all([
     supabase
       .from("buildings")
@@ -70,6 +72,11 @@ export default async function AdminPage() {
       .select("id, initiated_by, status, duration_sec, recording_url, created_at, room:rooms(title), owner:profiles!calls_owner_id_fkey(full_name), tenant:profiles!calls_tenant_id_fkey(full_name)")
       .order("created_at", { ascending: false })
       .limit(30),
+    supabase
+      .from("feedback")
+      .select("id, name, category, message, created_at")
+      .order("created_at", { ascending: false })
+      .limit(50),
   ]);
 
   const pendingBuildings = (pending as PendingBuilding[]) ?? [];
@@ -77,6 +84,7 @@ export default async function AdminPage() {
   const bookingRows = (recentBookings as BookingRow[]) ?? [];
   const eventRows = (events as EventRow[]) ?? [];
   const callRows = (calls as unknown as CallRow[]) ?? [];
+  const feedbackRows = (feedback as FeedbackRow[]) ?? [];
 
   // Role-derived user counts.
   const owners = new Set((ownerRows ?? []).map((r) => (r as { owner_id: string }).owner_id));
@@ -232,6 +240,35 @@ export default async function AdminPage() {
             </tbody>
           </table>
         </Card>
+      </section>
+
+      {/* User feedback */}
+      <section className="mt-10">
+        <h2 className="flex items-center gap-2 text-lg font-bold">
+          <MessageSquare size={18} className="text-[var(--primary)]" /> User feedback
+        </h2>
+        {feedbackRows.length === 0 ? (
+          <Card className="mt-3 grid place-items-center py-12 text-sm text-[var(--muted)]">No feedback yet.</Card>
+        ) : (
+          <div className="mt-3 space-y-3">
+            {feedbackRows.map((f) => (
+              <Card key={f.id} className="p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm font-semibold">
+                    {f.name?.trim() || "Anonymous"}
+                    {f.category && (
+                      <span className="ml-2 rounded-full bg-[var(--surface-2)] px-2 py-0.5 text-xs font-medium text-[var(--muted)]">
+                        {f.category}
+                      </span>
+                    )}
+                  </p>
+                  <span className="text-xs text-[var(--muted)]">{timeAgo(f.created_at)}</span>
+                </div>
+                <p className="mt-1.5 whitespace-pre-line text-sm text-[var(--foreground)]/90">{f.message}</p>
+              </Card>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Activity log */}

@@ -28,7 +28,9 @@ export function RequestToRent({
       return;
     }
     if (!detailsComplete) {
-      router.push(`/account/details?next=${encodeURIComponent(`/rooms/${roomId}`)}`);
+      // Carry the room along so the details form can save AND book in one step,
+      // instead of bouncing the user back here to click again.
+      router.push(`/account/details?book=${roomId}`);
       return;
     }
     setLoading(true);

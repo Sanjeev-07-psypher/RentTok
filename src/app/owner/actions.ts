@@ -19,6 +19,7 @@ const buildingSchema = z.object({
     .trim()
     .regex(/^(\+?91[-\s]?)?[6-9]\d{9}$/, "Enter a valid 10-digit mobile number"),
   description: z.string().max(2000).optional().default(""),
+  rules: z.string().max(2000).optional().default(""),
   amenities: z.array(z.string()).default([]),
   photoUrls: z.array(z.string().url()).default([]),
 });
@@ -58,6 +59,7 @@ export async function createBuilding(input: unknown): Promise<ActionResult> {
       address: data.address,
       contact_phone: data.contact_phone,
       description: data.description || null,
+      rules: data.rules || null,
       amenities: data.amenities,
       status: "pending",
     })
@@ -79,12 +81,11 @@ export async function createBuilding(input: unknown): Promise<ActionResult> {
 const roomSchema = z.object({
   building_id: z.string().uuid(),
   title: z.string().min(2, "Room label is required"),
-  type: z.enum(["single", "shared"]),
+  bhk: z.coerce.number().int().min(1, "Pick a BHK").max(20),
   rent: z.coerce.number().int().min(0),
   deposit: z.coerce.number().int().min(0),
   total_units: z.coerce.number().int().min(1).max(100).default(1),
   description: z.string().max(2000).optional().default(""),
-  rules: z.string().max(2000).optional().default(""),
   amenities: z.array(z.string()).default([]),
   photoUrls: z.array(z.string().url()).default([]),
 });
@@ -117,7 +118,7 @@ export async function addRoom(input: unknown): Promise<ActionResult> {
       owner_id: user.id,
       building_id: building.id,
       title: data.title,
-      type: data.type,
+      bhk: data.bhk,
       area: building.area,
       address: building.address,
       city: building.city,
@@ -127,7 +128,6 @@ export async function addRoom(input: unknown): Promise<ActionResult> {
       deposit: data.deposit,
       total_units: data.total_units,
       description: data.description || null,
-      rules: data.rules || null,
       amenities: data.amenities,
       availability: "available",
       status: building.status,
@@ -180,6 +180,7 @@ const buildingEditSchema = z.object({
   address: z.string().min(4, "Address is required"),
   contact_phone: z.string().trim().regex(/^(\+?91[-\s]?)?[6-9]\d{9}$/, "Enter a valid mobile number"),
   description: z.string().max(2000).optional().default(""),
+  rules: z.string().max(2000).optional().default(""),
   amenities: z.array(z.string()).default([]),
 });
 
@@ -214,6 +215,7 @@ export async function updateBuilding(input: unknown): Promise<{ ok: boolean; err
       address: data.address,
       contact_phone: data.contact_phone,
       description: data.description || null,
+      rules: data.rules || null,
       amenities: data.amenities,
       status: "pending",
       owner_verified: false,
@@ -231,12 +233,11 @@ export async function updateBuilding(input: unknown): Promise<{ ok: boolean; err
 const roomEditSchema = z.object({
   id: z.string().uuid(),
   title: z.string().min(2, "Room label is required"),
-  type: z.enum(["single", "shared"]),
+  bhk: z.coerce.number().int().min(1, "Pick a BHK").max(20),
   total_units: z.coerce.number().int().min(1).max(100),
   rent: z.coerce.number().int().min(0),
   deposit: z.coerce.number().int().min(0),
   description: z.string().max(2000).optional().default(""),
-  rules: z.string().max(2000).optional().default(""),
   amenities: z.array(z.string()).default([]),
 });
 
@@ -266,12 +267,11 @@ export async function updateRoom(input: unknown): Promise<{ ok: boolean; error?:
     .from("rooms")
     .update({
       title: data.title,
-      type: data.type,
+      bhk: data.bhk,
       total_units: data.total_units,
       rent: data.rent,
       deposit: data.deposit,
       description: data.description || null,
-      rules: data.rules || null,
       amenities: data.amenities,
       status: "pending",
     })
@@ -307,6 +307,65 @@ export async function deleteRoom(roomId: string): Promise<{ ok: boolean; error?:
   if (error) return { ok: false, error: error.message };
 
   revalidatePath("/owner");
+  return { ok: true };
+}
+
+// Owner pauses/resumes a whole building. Inactive buildings drop out of public
+// search + detail (enforced by RLS) but stay in the owner's dashboard.
+export async function setBuildingActive(
+  buildingId: string,
+  active: boolean
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createServerSupabase();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Please sign in." };
+
+  const { data: building } = await supabase.from("buildings").select("owner_id").eq("id", buildingId).single();
+  if (!building) return { ok: false, error: "Building not found." };
+  if (building.owner_id !== user.id) return { ok: false, error: "You can only manage your own buildings." };
+
+  const { error } = await supabase.from("buildings").update({ active }).eq("id", buildingId);
+  if (error) return { ok: false, error: error.message };
+
+  await logEvent({
+    type: active ? "building_activated" : "building_deactivated",
+    actorId: user.id,
+    entity: "building",
+    entityId: buildingId,
+  });
+  revalidatePath("/owner");
+  revalidatePath(`/buildings/${buildingId}`);
+  return { ok: true };
+}
+
+// Owner pauses/resumes a single room without touching the rest of the building.
+export async function setRoomActive(
+  roomId: string,
+  active: boolean
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createServerSupabase();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Please sign in." };
+
+  const { data: room } = await supabase.from("rooms").select("owner_id, building_id").eq("id", roomId).single();
+  if (!room) return { ok: false, error: "Room not found." };
+  if (room.owner_id !== user.id) return { ok: false, error: "You can only manage your own rooms." };
+
+  const { error } = await supabase.from("rooms").update({ active }).eq("id", roomId);
+  if (error) return { ok: false, error: error.message };
+
+  await logEvent({
+    type: active ? "room_activated" : "room_deactivated",
+    actorId: user.id,
+    entity: "room",
+    entityId: roomId,
+  });
+  revalidatePath("/owner");
+  if (room.building_id) revalidatePath(`/buildings/${room.building_id}`);
   return { ok: true };
 }
 
