@@ -58,24 +58,26 @@ function matchRoomFilters(b: Building, f: BuildingFilters): boolean {
 }
 
 function sortBuildings(list: Building[], f: BuildingFilters): Building[] {
-  const sorted = [...list];
-  switch (f.sort) {
-    case "price_asc":
-      sorted.sort((a, b) => (a.min_rent ?? 0) - (b.min_rent ?? 0));
-      break;
-    case "price_desc":
-      sorted.sort((a, b) => (b.min_rent ?? 0) - (a.min_rent ?? 0));
-      break;
-    case "rating":
-      sorted.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
-      break;
-    case "nearest":
-      sorted.sort((a, b) => (a.distance_km ?? Infinity) - (b.distance_km ?? Infinity));
-      break;
-    default: // newest
-      sorted.sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
-  }
-  return sorted;
+  // Buildings with at least one free unit always rank above fully-booked ones
+  // (which stay visible at the end so users can save them for later).
+  const availRank = (b: Building) => ((b.available_count ?? 0) > 0 ? 0 : 1);
+
+  const byChosen = (a: Building, b: Building): number => {
+    switch (f.sort) {
+      case "price_asc":
+        return (a.min_rent ?? 0) - (b.min_rent ?? 0);
+      case "price_desc":
+        return (b.min_rent ?? 0) - (a.min_rent ?? 0);
+      case "rating":
+        return (b.rating ?? 0) - (a.rating ?? 0);
+      case "nearest":
+        return (a.distance_km ?? Infinity) - (b.distance_km ?? Infinity);
+      default: // newest
+        return +new Date(b.created_at) - +new Date(a.created_at);
+    }
+  };
+
+  return [...list].sort((a, b) => availRank(a) - availRank(b) || byChosen(a, b));
 }
 
 function filterSampleBuildings(buildings: Building[], f: BuildingFilters): Building[] {

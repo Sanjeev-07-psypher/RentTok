@@ -28,6 +28,13 @@ export default async function EditRoomPage(props: PageProps<"/owner/rooms/[id]/e
   const r = room as Room;
   const occupied = (r.booked_units ?? 0) > 0;
 
+  // The floor dropdown is bounded by the parent building's floor count.
+  let buildingFloors: number | null = null;
+  if (r.building_id) {
+    const { data: b } = await supabase.from("buildings").select("floors").eq("id", r.building_id).single();
+    buildingFloors = b?.floors ?? null;
+  }
+
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
       <Link href="/owner" className="inline-flex items-center gap-1 text-sm text-[var(--muted)] hover:text-[var(--foreground)]">
@@ -41,7 +48,7 @@ export default async function EditRoomPage(props: PageProps<"/owner/rooms/[id]/e
           room type from your dashboard.
         </Card>
       ) : (
-        <EditRoomForm room={r} />
+        <EditRoomForm room={r} buildingFloors={buildingFloors} />
       )}
     </div>
   );

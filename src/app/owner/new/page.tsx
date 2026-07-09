@@ -9,6 +9,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { BUILDING_TYPES, AREAS, AMENITIES } from "@/lib/constants";
 import { Button, Input, Textarea, Select, Card } from "@/components/ui";
 import { AmenityIcon } from "@/components/amenity-icon";
+import { FloorsPicker } from "@/components/floors-picker";
 import { createBuilding } from "../actions";
 
 interface Photo {
@@ -19,6 +20,7 @@ interface Photo {
 export default function NewBuildingPage() {
   const router = useRouter();
   const [amenities, setAmenities] = useState<string[]>([]);
+  const [floors, setFloors] = useState(2);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
@@ -70,6 +72,7 @@ export default function NewBuildingPage() {
       area: fd.get("area"),
       address: fd.get("address"),
       contact_phone: fd.get("contact_phone"),
+      floors,
       description: fd.get("description"),
       rules: fd.get("rules"),
       amenities,
@@ -119,6 +122,9 @@ export default function NewBuildingPage() {
           </Field>
           <Field label="Contact number">
             <Input name="contact_phone" type="tel" required placeholder="10-digit mobile (our team calls to verify)" />
+          </Field>
+          <Field label="Total floors">
+            <FloorsPicker value={floors} onChange={setFloors} />
           </Field>
           <Field label="Description">
             <Textarea name="description" rows={4} placeholder="Describe the building, surroundings, who it suits…" />

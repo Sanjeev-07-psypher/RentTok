@@ -3,7 +3,7 @@ import { Plus, Building2, DoorOpen, Pencil } from "lucide-react";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getCurrentUser } from "@/lib/auth";
-import { BUILDING_TYPES, roomKindLabel } from "@/lib/constants";
+import { BUILDING_TYPES, roomKindLabel, floorLabel } from "@/lib/constants";
 import { formatINR } from "@/lib/utils";
 import { Button, Card } from "@/components/ui";
 import { ConnectNotice } from "@/components/connect-notice";
@@ -108,7 +108,8 @@ export default async function OwnerDashboard() {
                       <StatusBadge label={bBadge.label} tone={bBadge.tone} />
                     </div>
                     <p className="mt-1 text-sm text-[var(--muted)]">
-                      {typeLabel} · {building.area} · {rooms.length} room{rooms.length === 1 ? "" : "s"} · {available} available
+                      {typeLabel} · {building.area}
+                      {building.floors ? ` · ${building.floors} floor${building.floors === 1 ? "" : "s"}` : ""} · {rooms.length} room{rooms.length === 1 ? "" : "s"} · {available} available
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-1">
@@ -136,7 +137,10 @@ export default async function OwnerDashboard() {
                             <div>
                               <div className="flex flex-wrap items-center gap-2">
                                 <p className="text-sm font-medium">{room.title}</p>
-                                <span className="text-xs text-[var(--muted)]">{roomKindLabel(room)}</span>
+                                <span className="text-xs text-[var(--muted)]">
+                                  {roomKindLabel(room)}
+                                  {room.floor != null ? ` · ${floorLabel(room.floor)}` : ""}
+                                </span>
                                 <StatusBadge label={rBadge.label} tone={rBadge.tone} />
                               </div>
                               <p className="mt-0.5 text-xs text-[var(--muted)]">

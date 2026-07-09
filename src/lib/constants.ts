@@ -23,6 +23,22 @@ export type RoomType = (typeof ROOM_TYPES)[number]["value"];
 // Rooms are now described by BHK. Owners pick 1/2/3 or enter a custom count (4+).
 export const BHK_PRESETS = [1, 2, 3] as const;
 
+// Building floors. Most buildings in Sikkim are low-rise, so offer 1–7 as quick
+// picks with a manual entry for anything taller.
+export const FLOOR_PRESETS = [1, 2, 3, 4, 5, 6, 7] as const;
+export const FLOOR_MAX = 50;
+
+// Floor label. 0 = Ground floor, then 1st/2nd/3rd/… with correct ordinals.
+export function floorLabel(n: number | null | undefined): string {
+  if (n == null) return "";
+  if (n === 0) return "Ground floor";
+  const mod100 = n % 100;
+  const mod10 = n % 10;
+  const suffix =
+    mod100 >= 11 && mod100 <= 13 ? "th" : mod10 === 1 ? "st" : mod10 === 2 ? "nd" : mod10 === 3 ? "rd" : "th";
+  return `${n}${suffix} floor`;
+}
+
 // Display label for a room: prefer its BHK; fall back to the legacy single/shared
 // type for listings created before the BHK switch.
 export function roomKindLabel(room: { bhk?: number | null; type?: string | null }): string {

@@ -16,6 +16,7 @@ export interface Building {
   city: string;
   contact_phone: string | null;
   rules: string | null;
+  floors: number | null;
   lat: number | null;
   lng: number | null;
   amenities: AmenityValue[];
@@ -68,6 +69,7 @@ export interface Room {
   title: string;
   type: RoomType | null;
   bhk: number | null;
+  floor: number | null;
   description: string | null;
   area: string;
   address: string;

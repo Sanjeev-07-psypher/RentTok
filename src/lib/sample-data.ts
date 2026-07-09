@@ -4,7 +4,10 @@ import type { Room, Building } from "./types";
 const now = new Date().toISOString();
 
 function room(
-  r: Omit<Room, "city" | "status" | "active" | "bhk" | "availability" | "photos" | "total_units" | "booked_units"> &
+  r: Omit<
+    Room,
+    "city" | "status" | "active" | "bhk" | "floor" | "availability" | "photos" | "total_units" | "booked_units"
+  > &
     Partial<Room>
 ): Room {
   return {
@@ -12,6 +15,7 @@ function room(
     status: "approved",
     active: true,
     bhk: null,
+    floor: null,
     availability: "available",
     total_units: 1,
     booked_units: 0,
@@ -81,7 +85,7 @@ export const SAMPLE_ROOMS: Room[] = [
 ];
 
 function building(
-  b: Omit<Building, "city" | "status" | "active" | "rules" | "owner_verified" | "owner_verified_at" | "photos" | "contact_phone">
+  b: Omit<Building, "city" | "status" | "active" | "rules" | "floors" | "owner_verified" | "owner_verified_at" | "photos" | "contact_phone">
 ): Building {
   const rooms = SAMPLE_ROOMS.filter((r) => r.building_id === b.id);
   const available = rooms.filter((r) => r.availability === "available");
@@ -90,6 +94,7 @@ function building(
     status: "approved",
     active: true,
     rules: "No smoking indoors. Keep common areas clean.",
+    floors: 3,
     owner_verified: true,
     owner_verified_at: now,
     contact_phone: "9800000000",
