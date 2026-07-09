@@ -4,7 +4,7 @@ import Image from "next/image";
 import { MapPin, BadgeCheck, DoorOpen, ArrowLeft } from "lucide-react";
 import { getRoom } from "@/lib/data";
 import { getCurrentUser, tenantDetailsComplete } from "@/lib/auth";
-import { AMENITIES, roomKindLabel } from "@/lib/constants";
+import { AMENITIES, roomKindLabel, floorLabel } from "@/lib/constants";
 import { formatINR } from "@/lib/utils";
 import { Card } from "@/components/ui";
 import { AmenityIcon } from "@/components/amenity-icon";
@@ -66,6 +66,9 @@ export default async function RoomPage(props: PageProps<"/rooms/[id]">) {
         <div>
           <div className="flex flex-wrap items-center gap-3">
             <span className="rounded-full bg-[var(--surface-2)] px-3 py-1 text-xs font-medium">{typeLabel}</span>
+            {room.floor != null && (
+              <span className="rounded-full bg-[var(--surface-2)] px-3 py-1 text-xs font-medium">{floorLabel(room.floor)}</span>
+            )}
             <span className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium ${isFull ? "bg-[var(--surface-2)] text-[var(--muted)]" : "bg-green-500/15 text-green-600 dark:text-green-400"}`}>
               <DoorOpen size={13} /> {isFull ? "Fully booked" : `${available} of ${total} available`}
             </span>

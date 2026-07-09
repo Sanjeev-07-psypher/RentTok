@@ -18,7 +18,7 @@ export default async function AddRoomPage(props: PageProps<"/owner/buildings/[id
   const supabase = await createServerSupabase();
   const { data: building } = await supabase
     .from("buildings")
-    .select("id, name, owner_id")
+    .select("id, name, owner_id, floors")
     .eq("id", id)
     .single();
 
@@ -26,7 +26,12 @@ export default async function AddRoomPage(props: PageProps<"/owner/buildings/[id
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
-      <AddRoomForm buildingId={building.id} buildingName={building.name} isFirst={isFirst} />
+      <AddRoomForm
+        buildingId={building.id}
+        buildingName={building.name}
+        buildingFloors={building.floors}
+        isFirst={isFirst}
+      />
     </div>
   );
 }

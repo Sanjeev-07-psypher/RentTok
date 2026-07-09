@@ -11,6 +11,7 @@ import { AMENITIES } from "@/lib/constants";
 import { Button, Input, Textarea, Card } from "@/components/ui";
 import { AmenityIcon } from "@/components/amenity-icon";
 import { BhkPicker } from "@/components/bhk-picker";
+import { RoomFloorSelect } from "@/components/room-floor-select";
 import { addRoom } from "@/app/owner/actions";
 
 interface Photo {
@@ -21,15 +22,18 @@ interface Photo {
 export function AddRoomForm({
   buildingId,
   buildingName,
+  buildingFloors,
   isFirst,
 }: {
   buildingId: string;
   buildingName: string;
+  buildingFloors?: number | null;
   isFirst: boolean;
 }) {
   const router = useRouter();
   const [amenities, setAmenities] = useState<string[]>([]);
   const [bhk, setBhk] = useState(1);
+  const [floor, setFloor] = useState(0);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [added, setAdded] = useState(0);
@@ -81,6 +85,7 @@ export function AddRoomForm({
       building_id: buildingId,
       title: fd.get("title"),
       bhk,
+      floor,
       total_units: fd.get("total_units"),
       rent: fd.get("rent"),
       deposit: fd.get("deposit"),
@@ -95,6 +100,7 @@ export function AddRoomForm({
       setAdded((n) => n + 1);
       setAmenities([]);
       setBhk(1);
+      setFloor(0);
       setPhotos([]);
       setFormKey((k) => k + 1);
     } else {
@@ -118,9 +124,14 @@ export function AddRoomForm({
           <Field label="Room type (BHK)">
             <BhkPicker value={bhk} onChange={setBhk} />
           </Field>
-          <Field label="How many identical rooms of this type?">
-            <Input name="total_units" type="number" min={1} max={100} required defaultValue={1} />
-          </Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Floor">
+              <RoomFloorSelect value={floor} onChange={setFloor} buildingFloors={buildingFloors} />
+            </Field>
+            <Field label="How many identical rooms of this type?">
+              <Input name="total_units" type="number" min={1} max={100} required defaultValue={1} />
+            </Field>
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Rent (₹/month)">
               <Input name="rent" type="number" required min={0} placeholder="6000" />

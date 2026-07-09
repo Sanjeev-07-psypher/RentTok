@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { MapPin, DoorOpen, CheckCircle2 } from "lucide-react";
 import { getBuilding, getWishlistIds } from "@/lib/data";
-import { BUILDING_TYPES, AMENITIES, roomKindLabel } from "@/lib/constants";
+import { BUILDING_TYPES, AMENITIES, roomKindLabel, floorLabel } from "@/lib/constants";
 import { formatINR } from "@/lib/utils";
 import { Card } from "@/components/ui";
 import { AmenityIcon } from "@/components/amenity-icon";
@@ -121,7 +121,10 @@ export default async function BuildingPage(props: PageProps<"/buildings/[id]">) 
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <p className="font-semibold">{room.title}</p>
-                        <p className="text-xs text-[var(--muted)]">{roomTypeLabel}</p>
+                        <p className="text-xs text-[var(--muted)]">
+                          {roomTypeLabel}
+                          {room.floor != null ? ` · ${floorLabel(room.floor)}` : ""}
+                        </p>
                       </div>
                       <span
                         className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${

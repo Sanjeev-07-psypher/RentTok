@@ -6,12 +6,14 @@ import { toast } from "sonner";
 import { BUILDING_TYPES, AREAS, AMENITIES } from "@/lib/constants";
 import { Button, Input, Textarea, Select, Card } from "@/components/ui";
 import { AmenityIcon } from "@/components/amenity-icon";
+import { FloorsPicker } from "@/components/floors-picker";
 import { updateBuilding } from "@/app/owner/actions";
 import type { Building } from "@/lib/types";
 
 export function EditBuildingForm({ building }: { building: Building }) {
   const router = useRouter();
   const [amenities, setAmenities] = useState<string[]>(building.amenities ?? []);
+  const [floors, setFloors] = useState(building.floors && building.floors > 0 ? building.floors : 1);
   const [submitting, setSubmitting] = useState(false);
 
   const toggle = (v: string) =>
@@ -28,6 +30,7 @@ export function EditBuildingForm({ building }: { building: Building }) {
       area: fd.get("area"),
       address: fd.get("address"),
       contact_phone: fd.get("contact_phone"),
+      floors,
       description: fd.get("description"),
       rules: fd.get("rules"),
       amenities,
@@ -69,6 +72,9 @@ export function EditBuildingForm({ building }: { building: Building }) {
         </Field>
         <Field label="Contact number">
           <Input name="contact_phone" type="tel" required defaultValue={building.contact_phone ?? ""} />
+        </Field>
+        <Field label="Total floors">
+          <FloorsPicker value={floors} onChange={setFloors} />
         </Field>
         <Field label="Description">
           <Textarea name="description" rows={4} defaultValue={building.description ?? ""} />

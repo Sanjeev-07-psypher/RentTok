@@ -7,13 +7,15 @@ import { AMENITIES } from "@/lib/constants";
 import { Button, Input, Textarea, Card } from "@/components/ui";
 import { AmenityIcon } from "@/components/amenity-icon";
 import { BhkPicker } from "@/components/bhk-picker";
+import { RoomFloorSelect } from "@/components/room-floor-select";
 import { updateRoom } from "@/app/owner/actions";
 import type { Room } from "@/lib/types";
 
-export function EditRoomForm({ room }: { room: Room }) {
+export function EditRoomForm({ room, buildingFloors }: { room: Room; buildingFloors?: number | null }) {
   const router = useRouter();
   const [amenities, setAmenities] = useState<string[]>(room.amenities ?? []);
   const [bhk, setBhk] = useState(room.bhk && room.bhk > 0 ? room.bhk : 1);
+  const [floor, setFloor] = useState(room.floor ?? 0);
   const [submitting, setSubmitting] = useState(false);
 
   const toggle = (v: string) =>
@@ -27,6 +29,7 @@ export function EditRoomForm({ room }: { room: Room }) {
       id: room.id,
       title: fd.get("title"),
       bhk,
+      floor,
       total_units: fd.get("total_units"),
       rent: fd.get("rent"),
       deposit: fd.get("deposit"),
@@ -52,9 +55,14 @@ export function EditRoomForm({ room }: { room: Room }) {
         <Field label="Room type (BHK)">
           <BhkPicker value={bhk} onChange={setBhk} />
         </Field>
-        <Field label="How many identical rooms of this type?">
-          <Input name="total_units" type="number" min={1} max={100} required defaultValue={room.total_units ?? 1} />
-        </Field>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Floor">
+            <RoomFloorSelect value={floor} onChange={setFloor} buildingFloors={buildingFloors} />
+          </Field>
+          <Field label="How many identical rooms of this type?">
+            <Input name="total_units" type="number" min={1} max={100} required defaultValue={room.total_units ?? 1} />
+          </Field>
+        </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Rent (₹/month)">
             <Input name="rent" type="number" min={0} required defaultValue={room.rent} />
