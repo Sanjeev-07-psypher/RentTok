@@ -5,6 +5,9 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseHost = supabaseUrl ? new URL(supabaseUrl).hostname : undefined;
 
 const nextConfig: NextConfig = {
+  // web-push is a Node library (uses https/crypto) — keep it external so it runs
+  // from node_modules on the server instead of being bundled.
+  serverExternalPackages: ["web-push"],
   // Allow opening the dev server over the LAN (e.g. phone testing) without the
   // cross-origin HMR warning. Add your machine's LAN IP(s) here if it changes.
   allowedDevOrigins: ["192.168.1.4", "192.168.1.*"],

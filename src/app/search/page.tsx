@@ -24,6 +24,7 @@ export default async function SearchPage(props: PageProps<"/search">) {
       q,
       type: get("type"),
       area: get("area"),
+      forGender: get("for"),
       minRent: get("minRent") ? Number(get("minRent")) : undefined,
       maxRent: get("maxRent") ? Number(get("maxRent")) : undefined,
       amenities,

@@ -6,6 +6,7 @@ import {
   BUILDING_TYPES,
   AREAS,
   AMENITIES,
+  FOR_GENDER,
   SORT_OPTIONS,
   PRICE_MIN,
   PRICE_MAX,
@@ -98,6 +99,18 @@ export function SearchFilters() {
           <option value="">Any type</option>
           {BUILDING_TYPES.map((t) => (
             <option key={t.value} value={t.value}>{t.label}</option>
+          ))}
+        </Select>
+      </div>
+
+      <div>
+        <label className="mb-1.5 block text-sm font-medium">For</label>
+        <Select
+          value={params.get("for") ?? "any"}
+          onChange={(e) => setParam("for", e.target.value === "any" ? "" : e.target.value)}
+        >
+          {FOR_GENDER.map((g) => (
+            <option key={g.value} value={g.value}>{g.value === "any" ? "Anyone" : g.label}</option>
           ))}
         </Select>
       </div>

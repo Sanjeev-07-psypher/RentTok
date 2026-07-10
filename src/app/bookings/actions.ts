@@ -91,6 +91,7 @@ export async function requestBooking(roomId: string): Promise<RequestResult> {
     type: "booking_request",
     title: "New room request",
     body: `Someone requested "${room.title}". Review it in your dashboard.`,
+    link: `/owner/rooms/${roomId}`,
   });
   revalidate();
   return { ok: true, bookingId: booking.id };
@@ -141,6 +142,7 @@ export async function acceptBooking(bookingId: string): Promise<Result> {
     type: "booking_accepted",
     title: "Your request was accepted 🎉",
     body: "The owner accepted your request. Confirm to lock your room, and you can call them now.",
+    link: "/account/bookings",
   });
   revalidate();
   return { ok: true };
@@ -170,6 +172,7 @@ export async function rejectBooking(bookingId: string): Promise<Result> {
     type: "booking_rejected",
     title: "Request not selected",
     body: "The owner didn't select your request this time. Keep exploring other rooms on RentTok.",
+    link: "/account/bookings",
   });
   revalidate();
   return { ok: true };
@@ -200,6 +203,7 @@ export async function cancelBooking(bookingId: string): Promise<Result> {
       type: "booking_cancelled",
       title: "A request was cancelled",
       body: "A tenant cancelled their request. Their spot has opened up in your queue.",
+      link: `/owner/rooms/${booking.room_id}`,
     });
   }
   revalidate();
@@ -252,6 +256,7 @@ export async function confirmBooking(bookingId: string): Promise<Result> {
       type: "booking_confirm_pending",
       title: "One more step to lock the room",
       body: `${isOwner ? "The owner" : "The tenant"} confirmed the match — confirm from your side to lock it in.`,
+      link: isOwner ? "/account/bookings" : `/owner/rooms/${booking.room_id}`,
     });
     revalidate();
     return { ok: true };
@@ -303,6 +308,7 @@ export async function confirmBooking(bookingId: string): Promise<Result> {
           type: "booking_released",
           title: "Room filled",
           body: "This room type just filled up, so your request was released. Explore other rooms on RentTok.",
+          link: "/account/bookings",
         });
       }
       releasedOthers++;
@@ -322,12 +328,14 @@ export async function confirmBooking(bookingId: string): Promise<Result> {
     type: "booking_confirmed",
     title: "Booking confirmed 🎉",
     body: "You're all set — the room is locked in. The owner has your details to coordinate move-in.",
+    link: "/account/bookings",
   });
   await notifyUser({
     userId: booking.room.owner_id,
     type: "booking_confirmed",
     title: "Booking confirmed 🎉",
     body: "The match is locked in. Reach out to your new tenant to coordinate move-in.",
+    link: `/owner/rooms/${booking.room_id}`,
   });
   revalidate();
   return { ok: true };

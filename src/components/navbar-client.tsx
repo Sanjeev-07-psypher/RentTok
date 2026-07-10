@@ -166,7 +166,7 @@ function UserMenu({ user, onSignOut, unreadCount }: { user: NavUser; onSignOut: 
             <MenuLink href="/account/bookings" icon={<CalendarCheck size={16} />} label="My bookings" onClick={() => setOpen(false)} />
             <MenuLink href="/account/wishlist" icon={<Heart size={16} />} label="Wishlist" onClick={() => setOpen(false)} />
             <MenuLink href="/account/history" icon={<History size={16} />} label="Recently viewed" onClick={() => setOpen(false)} />
-            <MenuLink href="/owner" icon={<LayoutDashboard size={16} />} label="Owner dashboard" onClick={() => setOpen(false)} />
+            <MenuLink href="/owner" icon={<LayoutDashboard size={16} />} label="Dashboard" onClick={() => setOpen(false)} />
             {user.isAdmin && (
               <MenuLink href="/admin" icon={<Shield size={16} />} label="Admin" onClick={() => setOpen(false)} />
             )}

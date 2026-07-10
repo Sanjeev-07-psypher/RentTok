@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { ImagePlus, X, ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { AMENITIES } from "@/lib/constants";
+import { AMENITIES, MAX_PHOTOS } from "@/lib/constants";
 import { Button, Input, Textarea, Card } from "@/components/ui";
 import { AmenityIcon } from "@/components/amenity-icon";
 import { BhkPicker } from "@/components/bhk-picker";
@@ -15,6 +15,7 @@ import { RoomFloorSelect } from "@/components/room-floor-select";
 import { addRoom } from "@/app/owner/actions";
 
 interface Photo {
+  id: string;
   url: string;
   uploading: boolean;
 }
@@ -44,6 +45,7 @@ export function AddRoomForm({
 
   async function onFiles(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
+    e.target.value = "";
     if (!files.length) return;
     if (!isSupabaseConfigured) {
       toast.error("Connect Supabase to upload photos.");
@@ -58,23 +60,36 @@ export function AddRoomForm({
       return;
     }
 
-    for (const file of files) {
-      const idx = photos.length;
-      setPhotos((p) => [...p, { url: "", uploading: true }]);
-      const path = `${user.id}/${crypto.randomUUID()}-${file.name.replace(/[^\w.-]/g, "_")}`;
-      const { error } = await supabase.storage.from("room-photos").upload(path, file, {
-        cacheControl: "3600",
-        upsert: false,
-      });
-      if (error) {
-        toast.error(`Upload failed: ${error.message}`);
-        setPhotos((p) => p.filter((_, i) => i !== idx));
-        continue;
-      }
-      const { data } = supabase.storage.from("room-photos").getPublicUrl(path);
-      setPhotos((p) => p.map((ph, i) => (i === idx ? { url: data.publicUrl, uploading: false } : ph)));
+    // Enforce the photo cap (count what's already added/uploading).
+    const room = MAX_PHOTOS - photos.length;
+    if (room <= 0) {
+      toast.error(`You can add up to ${MAX_PHOTOS} photos.`);
+      return;
     }
-    e.target.value = "";
+    if (files.length > room) {
+      toast.error(`Only ${room} more photo${room === 1 ? "" : "s"} allowed (max ${MAX_PHOTOS}).`);
+    }
+
+    // Upload in parallel; each placeholder is tracked by a stable id so results
+    // never overwrite each other (the old index-based approach lost all but one).
+    await Promise.all(
+      files.slice(0, room).map(async (file) => {
+        const id = crypto.randomUUID();
+        setPhotos((p) => [...p, { id, url: "", uploading: true }]);
+        const path = `${user.id}/${crypto.randomUUID()}-${file.name.replace(/[^\w.-]/g, "_")}`;
+        const { error } = await supabase.storage.from("room-photos").upload(path, file, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+        if (error) {
+          toast.error(`Upload failed: ${error.message}`);
+          setPhotos((p) => p.filter((ph) => ph.id !== id));
+          return;
+        }
+        const { data } = supabase.storage.from("room-photos").getPublicUrl(path);
+        setPhotos((p) => p.map((ph) => (ph.id === id ? { ...ph, url: data.publicUrl, uploading: false } : ph)));
+      })
+    );
   }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -175,8 +190,8 @@ export function AddRoomForm({
         <Card className="p-5">
           <p className="text-sm font-medium">Room photos</p>
           <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-4">
-            {photos.map((p, i) => (
-              <div key={i} className="relative aspect-square overflow-hidden rounded-xl bg-[var(--surface-2)]">
+            {photos.map((p) => (
+              <div key={p.id} className="relative aspect-square overflow-hidden rounded-xl bg-[var(--surface-2)]">
                 {p.uploading ? (
                   <div className="grid h-full place-items-center text-xs text-[var(--muted)]">Uploading…</div>
                 ) : (
@@ -185,7 +200,7 @@ export function AddRoomForm({
                     <img src={p.url} alt="" className="h-full w-full object-cover" />
                     <button
                       type="button"
-                      onClick={() => setPhotos((prev) => prev.filter((_, idx) => idx !== i))}
+                      onClick={() => setPhotos((prev) => prev.filter((ph) => ph.id !== p.id))}
                       className="absolute right-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-black/60 text-white"
                     >
                       <X size={14} />
@@ -194,11 +209,14 @@ export function AddRoomForm({
                 )}
               </div>
             ))}
-            <label className="grid aspect-square cursor-pointer place-items-center rounded-xl border border-dashed border-[var(--border)] text-[var(--muted)] hover:bg-[var(--surface-2)]">
-              <ImagePlus size={22} />
-              <input type="file" accept="image/*" multiple className="hidden" onChange={onFiles} />
-            </label>
+            {photos.length < MAX_PHOTOS && (
+              <label className="grid aspect-square cursor-pointer place-items-center rounded-xl border border-dashed border-[var(--border)] text-[var(--muted)] hover:bg-[var(--surface-2)]">
+                <ImagePlus size={22} />
+                <input type="file" accept="image/*" multiple className="hidden" onChange={onFiles} />
+              </label>
+            )}
           </div>
+          <p className="mt-2 text-xs text-[var(--muted)]">Up to {MAX_PHOTOS} photos.</p>
         </Card>
 
         <div className="flex flex-wrap gap-3">

@@ -37,6 +37,7 @@ export default async function DetailsPage(props: PageProps<"/account/details">) 
           full_name: p?.full_name,
           phone: p?.phone,
           age: p?.age,
+          gender: p?.gender,
           permanent_address: p?.permanent_address,
           guardian_name: p?.guardian_name,
           guardian_phone: p?.guardian_phone,

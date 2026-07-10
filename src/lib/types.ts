@@ -17,6 +17,7 @@ export interface Building {
   contact_phone: string | null;
   rules: string | null;
   floors: number | null;
+  for_gender: string | null;
   lat: number | null;
   lng: number | null;
   amenities: AmenityValue[];
@@ -51,6 +52,7 @@ export interface Profile {
   avatar_url: string | null;
   is_admin: boolean;
   age: number | null;
+  gender: string | null;
   permanent_address: string | null;
   guardian_name: string | null;
   guardian_phone: string | null;
@@ -149,6 +151,7 @@ export interface Notification {
   type: string;
   title: string;
   body: string | null;
+  link: string | null;
   read: boolean;
   created_at: string;
 }

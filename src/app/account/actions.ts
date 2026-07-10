@@ -46,6 +46,7 @@ const detailsSchema = z.object({
   full_name: z.string().trim().min(2, "Enter your full name"),
   phone: z.string().trim().regex(PHONE_RE, "Enter a valid mobile number"),
   age: z.coerce.number().int().min(16, "Must be 16+").max(120),
+  gender: z.enum(["male", "female", "other", "prefer_not_to_say"]),
   permanent_address: z.string().trim().min(6, "Enter your permanent address"),
   guardian_name: z.string().trim().min(2, "Enter your guardian's name"),
   guardian_phone: z.string().trim().regex(PHONE_RE, "Enter a valid guardian phone"),
@@ -66,6 +67,31 @@ export async function saveTenantDetails(input: unknown): Promise<{ ok: boolean; 
   const { error } = await supabase.from("profiles").update(parsed.data).eq("id", user.id);
   if (error) return { ok: false, error: error.message };
 
+  revalidatePath("/account/details");
+  revalidatePath("/owner");
+  return { ok: true };
+}
+
+// Dashboard quick-edit: owners can update just their phone + address here.
+const contactSchema = z.object({
+  phone: z.string().trim().regex(PHONE_RE, "Enter a valid mobile number"),
+  permanent_address: z.string().trim().min(6, "Enter your address"),
+});
+
+export async function updateContactInfo(input: unknown): Promise<{ ok: boolean; error?: string }> {
+  const parsed = contactSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input" };
+
+  const supabase = await createServerSupabase();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Please sign in." };
+
+  const { error } = await supabase.from("profiles").update(parsed.data).eq("id", user.id);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/owner");
   revalidatePath("/account/details");
   return { ok: true };
 }
@@ -108,6 +134,30 @@ export async function submitAadhaar(input: unknown): Promise<{ ok: boolean; erro
 
   revalidatePath("/account/verify");
   revalidatePath("/admin");
+  return { ok: true };
+}
+
+// Store a Web Push subscription for the signed-in user (one row per browser).
+const pushSubSchema = z.object({
+  endpoint: z.string().url(),
+  p256dh: z.string().min(1),
+  auth: z.string().min(1),
+});
+
+export async function savePushSubscription(input: unknown): Promise<{ ok: boolean; error?: string }> {
+  const parsed = pushSubSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Invalid subscription" };
+
+  const supabase = await createServerSupabase();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Please sign in." };
+
+  const { error } = await createAdminClient()
+    .from("push_subscriptions")
+    .upsert({ user_id: user.id, ...parsed.data }, { onConflict: "endpoint" });
+  if (error) return { ok: false, error: error.message };
   return { ok: true };
 }
 
