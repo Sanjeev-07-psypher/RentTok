@@ -69,7 +69,7 @@ export function SearchFilters() {
   const availableOnly = params.get("available") === "1";
 
   return (
-    <aside className="space-y-6 rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)] p-5">
+    <div className="space-y-6">
       <div>
         <label className="mb-1.5 block text-sm font-medium">Sort by</label>
         <Select value={params.get("sort") ?? "newest"} onChange={(e) => setParam("sort", e.target.value)}>
@@ -149,7 +149,7 @@ export function SearchFilters() {
       <Button variant="outline" className="w-full" onClick={() => router.push("/search")}>
         Clear filters
       </Button>
-    </aside>
+    </div>
   );
 }
 
