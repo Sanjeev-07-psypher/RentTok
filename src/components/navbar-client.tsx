@@ -23,9 +23,12 @@ export function NavbarClient({ user, unreadCount = 0 }: { user: NavUser | null; 
   const [q, setQ] = useState(params.get("q") ?? "");
   const [authOpen, setAuthOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   function submitSearch(e: React.FormEvent) {
     e.preventDefault();
+    setSearchOpen(false);
+    setMenuOpen(false);
     router.push(`/search?q=${encodeURIComponent(q)}`);
   }
 
@@ -52,7 +55,10 @@ export function NavbarClient({ user, unreadCount = 0 }: { user: NavUser | null; 
         </form>
 
         <div className="ml-auto flex items-center gap-2">
-          <ThemeToggle />
+          {/* Theme toggle lives in the bar on desktop; on mobile it moves into the menu. */}
+          <div className="hidden md:block">
+            <ThemeToggle />
+          </div>
           <Link href="/owner" className="hidden sm:block">
             <Button variant="outline" size="sm">List your space</Button>
           </Link>
@@ -63,9 +69,24 @@ export function NavbarClient({ user, unreadCount = 0 }: { user: NavUser | null; 
             <Button size="sm" onClick={() => setAuthOpen(true)}>Sign in</Button>
           )}
 
+          {/* Mobile search button — stays in the navbar, not the menu. */}
           <button
             className="grid h-10 w-10 place-items-center rounded-full border border-[var(--border)] md:hidden"
-            onClick={() => setMenuOpen((v) => !v)}
+            onClick={() => {
+              setSearchOpen((v) => !v);
+              setMenuOpen(false);
+            }}
+            aria-label="Search"
+          >
+            {searchOpen ? <X size={18} /> : <Search size={18} />}
+          </button>
+
+          <button
+            className="grid h-10 w-10 place-items-center rounded-full border border-[var(--border)] md:hidden"
+            onClick={() => {
+              setMenuOpen((v) => !v);
+              setSearchOpen(false);
+            }}
             aria-label="Menu"
           >
             {menuOpen ? <X size={18} /> : <Menu size={18} />}
@@ -73,20 +94,31 @@ export function NavbarClient({ user, unreadCount = 0 }: { user: NavUser | null; 
         </div>
       </div>
 
-      {menuOpen && (
+      {/* Mobile search bar (opens from the navbar search button) */}
+      {searchOpen && (
         <div className="border-t border-[var(--border)] px-4 py-3 md:hidden">
-          <form onSubmit={submitSearch} className="relative mb-3">
+          <form onSubmit={submitSearch} className="relative">
             <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
             <input
+              autoFocus
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search rooms…"
-              className="h-11 w-full rounded-full border border-[var(--border)] bg-[var(--surface)] pl-11 pr-4 text-sm"
+              placeholder="Search by area, city or room type…"
+              className="h-11 w-full rounded-full border border-[var(--border)] bg-[var(--surface)] pl-11 pr-4 text-sm placeholder:text-[var(--muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
             />
           </form>
+        </div>
+      )}
+
+      {menuOpen && (
+        <div className="border-t border-[var(--border)] px-4 py-3 md:hidden">
           <Link href="/owner" className="block py-2 text-sm" onClick={() => setMenuOpen(false)}>
             List your space
           </Link>
+          <div className="flex items-center justify-between py-2">
+            <span className="text-sm">Appearance</span>
+            <ThemeToggle />
+          </div>
         </div>
       )}
 

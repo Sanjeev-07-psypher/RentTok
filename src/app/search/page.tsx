@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { searchBuildings, getWishlistIds } from "@/lib/data";
 import { SearchFilters } from "@/components/search-filters";
+import { MobileFilters } from "@/components/mobile-filters";
 import { NearMeButton } from "@/components/near-me-button";
 import { BuildingCard } from "@/components/building-card";
 
@@ -64,30 +65,42 @@ export default async function SearchPage(props: PageProps<"/search">) {
       )}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[280px_1fr]">
-        <Suspense fallback={<div className="h-96 rounded-[var(--radius-card)] border border-[var(--border)]" />}>
-          <SearchFilters />
-        </Suspense>
+        {/* Desktop sidebar */}
+        <aside className="hidden self-start rounded-[var(--radius-card)] border border-[var(--border)] bg-[var(--surface)] p-5 lg:block">
+          <Suspense fallback={<div className="h-96" />}>
+            <SearchFilters />
+          </Suspense>
+        </aside>
 
-        {buildings.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {buildings.map((b) => (
-              <BuildingCard key={b.id} building={b} wishlisted={wishlistedIds.includes(b.id)} />
-            ))}
+        <div>
+          {/* Mobile: filters collapse behind a button so cards show first */}
+          <div className="mb-4 lg:hidden">
+            <Suspense fallback={null}>
+              <MobileFilters />
+            </Suspense>
           </div>
-        ) : (
-          <div className="grid place-items-center rounded-[var(--radius-card)] border border-dashed border-[var(--border)] py-24 text-center text-[var(--muted)]">
-            <div>
-              <p className="text-lg font-medium text-[var(--foreground)]">No stays listed yet</p>
-              <p className="mt-1 text-sm">
-                {suggestion ? (
-                  <>Try <Link href={`/search?area=${encodeURIComponent(suggestion)}`} className="text-[var(--primary)] hover:underline">{suggestion}</Link>, or clear some filters.</>
-                ) : (
-                  "Try widening your search or clearing some filters."
-                )}
-              </p>
+
+          {buildings.length > 0 ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {buildings.map((b) => (
+                <BuildingCard key={b.id} building={b} wishlisted={wishlistedIds.includes(b.id)} />
+              ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="grid place-items-center rounded-[var(--radius-card)] border border-dashed border-[var(--border)] py-24 text-center text-[var(--muted)]">
+              <div>
+                <p className="text-lg font-medium text-[var(--foreground)]">No stays listed yet</p>
+                <p className="mt-1 text-sm">
+                  {suggestion ? (
+                    <>Try <Link href={`/search?area=${encodeURIComponent(suggestion)}`} className="text-[var(--primary)] hover:underline">{suggestion}</Link>, or clear some filters.</>
+                  ) : (
+                    "Try widening your search or clearing some filters."
+                  )}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
