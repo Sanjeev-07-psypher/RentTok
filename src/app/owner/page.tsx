@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Plus, Building2, DoorOpen, Pencil } from "lucide-react";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, tenantDetailsComplete } from "@/lib/auth";
 import { BUILDING_TYPES, roomKindLabel, floorLabel } from "@/lib/constants";
 import { formatINR } from "@/lib/utils";
 import { Button, Card } from "@/components/ui";
@@ -10,9 +10,10 @@ import { ConnectNotice } from "@/components/connect-notice";
 import { DeleteListingButton } from "@/components/delete-listing-button";
 import { DeleteBuildingButton } from "@/components/delete-building-button";
 import { ActiveToggle } from "@/components/active-toggle";
+import { ProfileCard } from "@/components/profile-card";
 import type { Building, Room } from "@/lib/types";
 
-export const metadata = { title: "Owner dashboard — RentTok" };
+export const metadata = { title: "Dashboard — RentTok" };
 
 type RoomWithCount = Room & { bookings: { count: number }[] };
 
@@ -67,12 +68,27 @@ export default async function OwnerDashboard() {
     .order("created_at", { ascending: false });
 
   const list = (buildings as Building[]) ?? [];
+  const prof = user?.profile;
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
-      <div className="flex items-center justify-between">
+      {/* Profile header */}
+      <ProfileCard
+        name={prof?.full_name ?? null}
+        email={prof?.email ?? user?.email ?? null}
+        avatarUrl={prof?.avatar_url ?? null}
+        age={prof?.age ?? null}
+        gender={prof?.gender ?? null}
+        guardianName={prof?.guardian_name ?? null}
+        phone={prof?.phone ?? null}
+        address={prof?.permanent_address ?? null}
+        detailsComplete={tenantDetailsComplete(prof)}
+      />
+
+      {/* Buildings */}
+      <div className="mt-8 flex items-center justify-between border-t border-[var(--border)] pt-8">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Your buildings</h1>
+          <h2 className="text-xl font-bold tracking-tight sm:text-2xl">Your buildings</h2>
           <p className="mt-1 text-sm text-[var(--muted)]">Manage your properties, rooms and tenant requests.</p>
         </div>
         <Link href="/owner/new">

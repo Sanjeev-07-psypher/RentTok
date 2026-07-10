@@ -8,6 +8,7 @@ import { Footer } from "@/components/footer";
 import { InstallPrompt } from "@/components/install-prompt";
 import { Walkthrough } from "@/components/walkthrough";
 import { FeedbackPrompt } from "@/components/feedback-prompt";
+import { TermsGate } from "@/components/terms-gate";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 
@@ -53,6 +54,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <InstallPrompt />
           <Walkthrough />
           <FeedbackPrompt />
+          <TermsGate />
         </Providers>
       </body>
     </html>

@@ -47,6 +47,31 @@ export function roomKindLabel(room: { bhk?: number | null; type?: string | null 
   return legacy?.label ?? room.type ?? "Room";
 }
 
+export const GENDERS = [
+  { value: "male", label: "Male" },
+  { value: "female", label: "Female" },
+  { value: "other", label: "Other" },
+  { value: "prefer_not_to_say", label: "Prefer not to say" },
+] as const;
+
+export function genderLabel(v: string | null | undefined): string {
+  return GENDERS.find((g) => g.value === v)?.label ?? "";
+}
+
+// Who a building/PG/hostel is for. Powers the boys-only / girls-only filter.
+export const FOR_GENDER = [
+  { value: "any", label: "Anyone" },
+  { value: "boys", label: "Boys only" },
+  { value: "girls", label: "Girls only" },
+] as const;
+
+export function forGenderLabel(v: string | null | undefined): string {
+  return FOR_GENDER.find((g) => g.value === v)?.label ?? "";
+}
+
+// Max photos per building / room listing.
+export const MAX_PHOTOS = 6;
+
 export const AVAILABILITY = {
   available: "Available",
   booked: "Booked",

@@ -4,7 +4,7 @@ import { ArrowLeft, Building2, DoorOpen, Phone, MapPin, User } from "lucide-reac
 import { createServerSupabase } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getCurrentUser } from "@/lib/auth";
-import { BUILDING_TYPES, LISTING_STATUS, roomKindLabel, floorLabel } from "@/lib/constants";
+import { BUILDING_TYPES, LISTING_STATUS, roomKindLabel, floorLabel, forGenderLabel } from "@/lib/constants";
 import { formatINR, timeAgo } from "@/lib/utils";
 import { Card } from "@/components/ui";
 import { ConnectNotice } from "@/components/connect-notice";
@@ -63,6 +63,9 @@ export default async function AdminBuildingsPage() {
                       </Link>
                       <Pill>{LISTING_STATUS[b.status] ?? b.status}</Pill>
                       {!b.active && <Pill tone="muted">Inactive</Pill>}
+                      {(b.for_gender === "boys" || b.for_gender === "girls") && (
+                        <Pill tone="blue">{forGenderLabel(b.for_gender)}</Pill>
+                      )}
                       {b.owner_verified && <Pill tone="green">Owner verified</Pill>}
                     </div>
                     <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-[var(--muted)]">

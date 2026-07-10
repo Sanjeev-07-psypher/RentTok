@@ -54,8 +54,10 @@ export function Walkthrough() {
     const onManual = () => runTour();
     window.addEventListener("rt:tour", onManual);
 
+    // Wait until the Terms gate has been accepted so the two don't stack; the
+    // tour then runs on the next visit.
     let timer: ReturnType<typeof setTimeout> | undefined;
-    if (!localStorage.getItem(DONE_KEY)) {
+    if (!localStorage.getItem(DONE_KEY) && localStorage.getItem("rt_terms_accepted")) {
       timer = setTimeout(runTour, 900);
     }
     return () => {

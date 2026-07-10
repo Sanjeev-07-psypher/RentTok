@@ -13,6 +13,7 @@ export interface BuildingFilters {
   q?: string;
   type?: string;
   area?: string;
+  forGender?: string; // any | boys | girls
   minRent?: number;
   maxRent?: number;
   amenities?: string[];
@@ -90,6 +91,7 @@ function filterSampleBuildings(buildings: Building[], f: BuildingFilters): Build
       }
       if (f.type && b.type !== f.type) return false;
       if (f.area && b.area !== f.area) return false;
+      if (f.forGender && f.forGender !== "any" && b.for_gender !== f.forGender) return false;
       if (f.amenities?.length && !f.amenities.every((a) => b.amenities.includes(a as never))) return false;
       return matchRoomFilters(b, f);
     });
@@ -111,6 +113,7 @@ export async function getBuildings(filters: BuildingFilters = {}): Promise<Build
     query = query.or(`name.ilike.%${filters.q}%,area.ilike.%${filters.q}%,address.ilike.%${filters.q}%`);
   if (filters.type) query = query.eq("type", filters.type);
   if (filters.area) query = query.eq("area", filters.area);
+  if (filters.forGender && filters.forGender !== "any") query = query.eq("for_gender", filters.forGender);
   if (filters.amenities?.length) query = query.contains("amenities", filters.amenities);
 
   const { data, error } = await query.limit(60);

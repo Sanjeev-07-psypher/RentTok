@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Bell, CheckCircle2, XCircle, Info } from "lucide-react";
+import { Bell, CheckCircle2, XCircle, Info, ChevronRight } from "lucide-react";
 import { getNotifications } from "@/lib/data";
 import { getCurrentUser } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
@@ -7,6 +7,7 @@ import { timeAgo } from "@/lib/utils";
 import { Card } from "@/components/ui";
 import { ConnectNotice } from "@/components/connect-notice";
 import { MarkNotificationsRead } from "@/components/mark-notifications-read";
+import { PushOptIn } from "@/components/push-opt-in";
 
 export const metadata = { title: "Notifications — RentTok" };
 
@@ -32,6 +33,8 @@ export default async function NotificationsPage() {
         <Bell size={22} className="text-[var(--primary)]" /> Notifications
       </h1>
 
+      <PushOptIn />
+
       {notifications.length === 0 ? (
         <Card className="mt-6 grid place-items-center py-20 text-center">
           <Bell size={36} className="text-[var(--muted)]" />
@@ -40,16 +43,27 @@ export default async function NotificationsPage() {
         </Card>
       ) : (
         <div className="mt-6 space-y-3">
-          {notifications.map((n) => (
-            <Card key={n.id} className={`flex items-start gap-3 p-4 ${n.read ? "" : "border-[var(--primary)]/40"}`}>
-              <span className="mt-0.5 shrink-0">{icon(n.type)}</span>
-              <div>
-                <p className="font-semibold">{n.title}</p>
-                {n.body && <p className="mt-0.5 text-sm text-[var(--muted)]">{n.body}</p>}
-                <p className="mt-1 text-xs text-[var(--muted)]">{timeAgo(n.created_at)}</p>
-              </div>
-            </Card>
-          ))}
+          {notifications.map((n) => {
+            const inner = (
+              <>
+                <span className="mt-0.5 shrink-0">{icon(n.type)}</span>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold">{n.title}</p>
+                  {n.body && <p className="mt-0.5 text-sm text-[var(--muted)]">{n.body}</p>}
+                  <p className="mt-1 text-xs text-[var(--muted)]">{timeAgo(n.created_at)}</p>
+                </div>
+                {n.link && <ChevronRight size={18} className="mt-0.5 shrink-0 text-[var(--muted)]" />}
+              </>
+            );
+            const base = `flex items-start gap-3 p-4 ${n.read ? "" : "border-[var(--primary)]/40"}`;
+            return n.link ? (
+              <Link key={n.id} href={n.link} className="block">
+                <Card className={`${base} transition-colors hover:border-[var(--primary)]`}>{inner}</Card>
+              </Link>
+            ) : (
+              <Card key={n.id} className={base}>{inner}</Card>
+            );
+          })}
         </div>
       )}
     </div>

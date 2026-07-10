@@ -48,6 +48,7 @@ export async function reviewListing(buildingId: string, status: "approved" | "re
       status === "approved"
         ? "Your building passed review and is now live. You can add or edit rooms anytime."
         : "Your listing didn’t pass review. Please check the details (ownership, accuracy) and feel free to resubmit or contact support.",
+    link: status === "approved" ? `/buildings/${buildingId}` : "/owner",
   });
 
   revalidatePath("/admin");

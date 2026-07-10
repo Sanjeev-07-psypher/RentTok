@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { BUILDING_TYPES, AREAS, AMENITIES } from "@/lib/constants";
+import { BUILDING_TYPES, AREAS, AMENITIES, FOR_GENDER } from "@/lib/constants";
 import { Button, Input, Textarea, Select, Card } from "@/components/ui";
 import { AmenityIcon } from "@/components/amenity-icon";
 import { FloorsPicker } from "@/components/floors-picker";
@@ -31,6 +31,7 @@ export function EditBuildingForm({ building }: { building: Building }) {
       address: fd.get("address"),
       contact_phone: fd.get("contact_phone"),
       floors,
+      for_gender: fd.get("for_gender"),
       description: fd.get("description"),
       rules: fd.get("rules"),
       amenities,
@@ -72,6 +73,13 @@ export function EditBuildingForm({ building }: { building: Building }) {
         </Field>
         <Field label="Contact number">
           <Input name="contact_phone" type="tel" required defaultValue={building.contact_phone ?? ""} />
+        </Field>
+        <Field label="Who is it for?">
+          <Select name="for_gender" defaultValue={building.for_gender ?? "any"}>
+            {FOR_GENDER.map((g) => (
+              <option key={g.value} value={g.value}>{g.label}</option>
+            ))}
+          </Select>
         </Field>
         <Field label="Total floors">
           <FloorsPicker value={floors} onChange={setFloors} />

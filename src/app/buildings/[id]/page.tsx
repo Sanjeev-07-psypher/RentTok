@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import { MapPin, DoorOpen, CheckCircle2 } from "lucide-react";
 import { getBuilding, getWishlistIds } from "@/lib/data";
-import { BUILDING_TYPES, AMENITIES, roomKindLabel, floorLabel } from "@/lib/constants";
+import { BUILDING_TYPES, AMENITIES, roomKindLabel, floorLabel, forGenderLabel } from "@/lib/constants";
 import { formatINR } from "@/lib/utils";
 import { Card } from "@/components/ui";
 import { AmenityIcon } from "@/components/amenity-icon";
@@ -53,6 +53,11 @@ export default async function BuildingPage(props: PageProps<"/buildings/[id]">) 
         <div>
           <div className="flex flex-wrap items-center gap-3">
             <span className="rounded-full bg-[var(--surface-2)] px-3 py-1 text-xs font-medium">{typeLabel}</span>
+            {(building.for_gender === "boys" || building.for_gender === "girls") && (
+              <span className="rounded-full bg-[var(--primary)] px-3 py-1 text-xs font-semibold text-[var(--primary-foreground)]">
+                {forGenderLabel(building.for_gender)}
+              </span>
+            )}
             {building.owner_verified && (
               <span className="flex items-center gap-1 text-xs font-medium text-green-600 dark:text-green-400">
                 <CheckCircle2 size={14} /> Owner verified

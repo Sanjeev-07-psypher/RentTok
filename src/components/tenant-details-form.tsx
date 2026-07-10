@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Button, Input, Textarea, Card } from "@/components/ui";
+import { Button, Input, Textarea, Select, Card } from "@/components/ui";
+import { GENDERS } from "@/lib/constants";
 import { saveTenantDetails } from "@/app/account/actions";
 import { requestBooking } from "@/app/bookings/actions";
 
@@ -11,6 +12,7 @@ interface Initial {
   full_name?: string | null;
   phone?: string | null;
   age?: number | null;
+  gender?: string | null;
   permanent_address?: string | null;
   guardian_name?: string | null;
   guardian_phone?: string | null;
@@ -36,6 +38,7 @@ export function TenantDetailsForm({
       full_name: fd.get("full_name"),
       phone: fd.get("phone"),
       age: fd.get("age"),
+      gender: fd.get("gender"),
       permanent_address: fd.get("permanent_address"),
       guardian_name: fd.get("guardian_name"),
       guardian_phone: fd.get("guardian_phone"),
@@ -79,10 +82,18 @@ export function TenantDetailsForm({
           <Field label="Age">
             <Input name="age" type="number" min={16} max={120} required defaultValue={initial.age ?? ""} placeholder="20" />
           </Field>
-          <Field label="Phone number">
-            <Input name="phone" type="tel" required defaultValue={initial.phone ?? ""} placeholder="10-digit mobile" />
+          <Field label="Gender">
+            <Select name="gender" required defaultValue={initial.gender ?? ""}>
+              <option value="" disabled>Select…</option>
+              {GENDERS.map((g) => (
+                <option key={g.value} value={g.value}>{g.label}</option>
+              ))}
+            </Select>
           </Field>
         </div>
+        <Field label="Phone number">
+          <Input name="phone" type="tel" required defaultValue={initial.phone ?? ""} placeholder="10-digit mobile" />
+        </Field>
         <Field label="Permanent address">
           <Textarea name="permanent_address" rows={3} required defaultValue={initial.permanent_address ?? ""} placeholder="Home town address" />
         </Field>

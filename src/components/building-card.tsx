@@ -3,7 +3,7 @@ import Image from "next/image";
 import { MapPin, DoorOpen } from "lucide-react";
 import type { Building } from "@/lib/types";
 import { formatINR, formatDistance } from "@/lib/utils";
-import { BUILDING_TYPES } from "@/lib/constants";
+import { BUILDING_TYPES, forGenderLabel } from "@/lib/constants";
 import { AmenityIcon } from "./amenity-icon";
 import { WishlistButton } from "./wishlist-button";
 
@@ -35,9 +35,16 @@ export function BuildingCard({ building, wishlisted }: { building: Building; wis
           </div>
         )}
 
-        <span className="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-xs font-semibold text-[#222] shadow-sm">
-          {typeLabel}
-        </span>
+        <div className="absolute left-3 top-3 flex flex-col items-start gap-1">
+          <span className="rounded-full bg-white/95 px-2.5 py-1 text-xs font-semibold text-[#222] shadow-sm">
+            {typeLabel}
+          </span>
+          {(building.for_gender === "boys" || building.for_gender === "girls") && (
+            <span className="rounded-full bg-[var(--primary)] px-2 py-0.5 text-xs font-semibold text-[var(--primary-foreground)] shadow-sm">
+              {forGenderLabel(building.for_gender)}
+            </span>
+          )}
+        </div>
 
         <WishlistButton buildingId={building.id} initial={wishlisted} />
       </div>
