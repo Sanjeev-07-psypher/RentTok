@@ -78,6 +78,10 @@ export async function createBuilding(input: unknown): Promise<ActionResult> {
     );
   }
 
+  // Backfill the owner's profile phone from the building contact if they don't
+  // have one yet — so every owner has a reachable number on record.
+  await supabase.from("profiles").update({ phone: data.contact_phone }).eq("id", user.id).is("phone", null);
+
   revalidatePath("/owner");
   return { ok: true, id: building.id };
 }
@@ -233,6 +237,9 @@ export async function updateBuilding(input: unknown): Promise<{ ok: boolean; err
     })
     .eq("id", data.id);
   if (error) return { ok: false, error: error.message };
+
+  // Backfill the owner's profile phone from the building contact if it's empty.
+  await supabase.from("profiles").update({ phone: data.contact_phone }).eq("id", user.id).is("phone", null);
 
   await logEvent({ type: "building_edited", actorId: user.id, entity: "building", entityId: data.id });
   revalidatePath("/owner");
