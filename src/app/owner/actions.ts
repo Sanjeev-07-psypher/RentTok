@@ -356,6 +356,10 @@ export async function setBuildingActive(
   const { error } = await supabase.from("buildings").update({ active }).eq("id", buildingId);
   if (error) return { ok: false, error: error.message };
 
+  // Cascade to every room in the building so their state stays in sync:
+  // deactivating a building pauses all its rooms; reactivating brings them back.
+  await supabase.from("rooms").update({ active }).eq("building_id", buildingId).eq("owner_id", user.id);
+
   await logEvent({
     type: active ? "building_activated" : "building_deactivated",
     actorId: user.id,

@@ -51,16 +51,34 @@ export default function NewBuildingPage() {
   const toggleAmenity = (v: string) =>
     setAmenities((prev) => (prev.includes(v) ? prev.filter((a) => a !== v) : [...prev, v]));
 
+  const [attempted, setAttempted] = useState(false);
+
   const phoneOk = /^(\+?91[-\s]?)?[6-9]\d{9}$/.test(contactPhone.trim());
 
-  // Which step blocks Next until it's filled in.
-  const canProceed = [
-    name.trim().length >= 3,
-    area.trim().length >= 2 && address.trim().length >= 4,
-    phoneOk && floors >= 1,
-    true, // amenities optional
-    true, // photos optional
-  ][step];
+  // Per-field validation messages (empty string = valid). Shown once the user
+  // tries to advance, so people know exactly why Next isn't moving.
+  const errors = {
+    name: name.trim().length < 3 ? "Please enter the building name (at least 3 characters)." : "",
+    area: area.trim().length < 2 ? "Please enter the area / locality." : "",
+    address: address.trim().length < 4 ? "Please enter the full address." : "",
+    contact:
+      contactPhone.trim() === ""
+        ? "Please enter a contact number."
+        : !phoneOk
+          ? "Invalid number — enter a 10-digit mobile starting 6–9."
+          : "",
+    floors: floors < 1 ? "Please choose the number of floors." : "",
+  };
+
+  // Which fields each step validates.
+  const stepFields: (keyof typeof errors)[][] = [
+    ["name"],
+    ["area", "address"],
+    ["contact", "floors"],
+    [], // amenities optional
+    [], // photos optional
+  ];
+  const stepValid = stepFields[step].every((f) => !errors[f]);
 
   async function useMyLocation() {
     setLocating(true);
@@ -129,10 +147,15 @@ export default function NewBuildingPage() {
   }
 
   function next() {
-    if (!canProceed) return;
+    if (!stepValid) {
+      setAttempted(true); // reveal inline errors instead of silently blocking
+      return;
+    }
+    setAttempted(false);
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
   }
   function back() {
+    setAttempted(false);
     setStep((s) => Math.max(s - 1, 0));
   }
 
@@ -192,6 +215,7 @@ export default function NewBuildingPage() {
           <>
             <Field label="Building name">
               <Input value={name} onChange={(e) => setName(e.target.value)} required placeholder="e.g. Valley View Residency" autoFocus />
+              <FieldError show={attempted} msg={errors.name} />
             </Field>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Type">
@@ -227,9 +251,11 @@ export default function NewBuildingPage() {
 
             <Field label="Area / locality">
               <AreaCombobox value={area} onChange={setArea} />
+              <FieldError show={attempted} msg={errors.area} />
             </Field>
             <Field label="Full address">
               <Input value={address} onChange={(e) => setAddress(e.target.value)} required placeholder="Building / locality, landmark" />
+              <FieldError show={attempted} msg={errors.address} />
             </Field>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="City">
@@ -250,9 +276,11 @@ export default function NewBuildingPage() {
           <>
             <Field label="Contact number">
               <Input value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} type="tel" required placeholder="10-digit mobile (our team calls to verify)" />
+              <FieldError show={attempted} msg={errors.contact} />
             </Field>
             <Field label="Total floors">
               <FloorsPicker value={floors} onChange={setFloors} />
+              <FieldError show={attempted} msg={errors.floors} />
             </Field>
             <Field label="Description">
               <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} placeholder="Describe the building, surroundings, who it suits…" />
@@ -334,7 +362,7 @@ export default function NewBuildingPage() {
         </Button>
 
         {step < STEPS.length - 1 ? (
-          <Button onClick={next} disabled={!canProceed} size="lg">
+          <Button onClick={next} size="lg">
             Next <ArrowRight size={16} />
           </Button>
         ) : (
@@ -354,4 +382,9 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       {children}
     </label>
   );
+}
+
+function FieldError({ show, msg }: { show: boolean; msg: string }) {
+  if (!show || !msg) return null;
+  return <p className="mt-1.5 text-xs font-medium text-[var(--danger)]">{msg}</p>;
 }
