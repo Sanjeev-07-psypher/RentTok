@@ -9,6 +9,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { Button } from "./ui";
 import { ThemeToggle } from "./theme-toggle";
 import { AuthDialog } from "./auth-dialog";
+import { SearchAutocomplete } from "./search-autocomplete";
 
 export interface NavUser {
   id: string;
@@ -20,17 +21,9 @@ export interface NavUser {
 export function NavbarClient({ user, unreadCount = 0 }: { user: NavUser | null; unreadCount?: number }) {
   const router = useRouter();
   const params = useSearchParams();
-  const [q, setQ] = useState(params.get("q") ?? "");
   const [authOpen, setAuthOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-
-  function submitSearch(e: React.FormEvent) {
-    e.preventDefault();
-    setSearchOpen(false);
-    setMenuOpen(false);
-    router.push(`/search?q=${encodeURIComponent(q)}`);
-  }
 
   async function signOut() {
     if (isSupabaseConfigured) await createClient().auth.signOut();
@@ -44,15 +37,9 @@ export function NavbarClient({ user, unreadCount = 0 }: { user: NavUser | null; 
           Rent<span className="text-[var(--primary)]">Tok</span>
         </Link>
 
-        <form onSubmit={submitSearch} className="relative hidden flex-1 md:block">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search by area, city or room type…"
-            className="h-11 w-full rounded-full border border-[var(--border)] bg-[var(--surface)] pl-11 pr-4 text-sm placeholder:text-[var(--muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
-          />
-        </form>
+        <div className="relative hidden flex-1 md:block">
+          <SearchAutocomplete initial={params.get("q") ?? ""} />
+        </div>
 
         <div className="ml-auto flex items-center gap-2">
           {/* Theme toggle lives in the bar on desktop; on mobile it moves into the menu. */}
@@ -97,16 +84,14 @@ export function NavbarClient({ user, unreadCount = 0 }: { user: NavUser | null; 
       {/* Mobile search bar (opens from the navbar search button) */}
       {searchOpen && (
         <div className="border-t border-[var(--border)] px-4 py-3 md:hidden">
-          <form onSubmit={submitSearch} className="relative">
-            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--muted)]" />
-            <input
-              autoFocus
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search by area, city or room type…"
-              className="h-11 w-full rounded-full border border-[var(--border)] bg-[var(--surface)] pl-11 pr-4 text-sm placeholder:text-[var(--muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
-            />
-          </form>
+          <SearchAutocomplete
+            initial={params.get("q") ?? ""}
+            autoFocus
+            onNavigate={() => {
+              setSearchOpen(false);
+              setMenuOpen(false);
+            }}
+          />
         </div>
       )}
 

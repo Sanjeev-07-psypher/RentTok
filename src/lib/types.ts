@@ -14,6 +14,7 @@ export interface Building {
   area: string;
   address: string;
   city: string;
+  pincode: string | null;
   contact_phone: string | null;
   rules: string | null;
   floors: number | null;
