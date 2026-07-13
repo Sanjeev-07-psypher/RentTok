@@ -85,7 +85,7 @@ export const SAMPLE_ROOMS: Room[] = [
 ];
 
 function building(
-  b: Omit<Building, "city" | "status" | "active" | "rules" | "floors" | "for_gender" | "owner_verified" | "owner_verified_at" | "photos" | "contact_phone">
+  b: Omit<Building, "city" | "status" | "active" | "rules" | "floors" | "for_gender" | "pincode" | "owner_verified" | "owner_verified_at" | "photos" | "contact_phone">
 ): Building {
   const rooms = SAMPLE_ROOMS.filter((r) => r.building_id === b.id);
   const available = rooms.filter((r) => r.availability === "available");
@@ -96,6 +96,7 @@ function building(
     rules: "No smoking indoors. Keep common areas clean.",
     floors: 3,
     for_gender: "any",
+    pincode: null,
     owner_verified: true,
     owner_verified_at: now,
     contact_phone: "9800000000",

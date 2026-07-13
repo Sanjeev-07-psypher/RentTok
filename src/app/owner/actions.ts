@@ -14,6 +14,10 @@ const buildingSchema = z.object({
   type: z.enum(["pg", "hostel", "flat", "house"]),
   area: z.string().min(2, "Area is required"),
   address: z.string().min(4, "Address is required"),
+  city: z.string().trim().min(1).default("Gangtok"),
+  pincode: z.string().trim().max(10).optional().default(""),
+  lat: z.coerce.number().optional().nullable(),
+  lng: z.coerce.number().optional().nullable(),
   contact_phone: z
     .string()
     .trim()
@@ -59,6 +63,10 @@ export async function createBuilding(input: unknown): Promise<ActionResult> {
       type: data.type,
       area: data.area,
       address: data.address,
+      city: data.city || "Gangtok",
+      pincode: data.pincode || null,
+      lat: data.lat ?? null,
+      lng: data.lng ?? null,
       contact_phone: data.contact_phone,
       floors: data.floors,
       for_gender: data.for_gender,

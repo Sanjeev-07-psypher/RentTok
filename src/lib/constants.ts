@@ -112,7 +112,8 @@ export const AMENITIES = [
 
 export type AmenityValue = (typeof AMENITIES)[number]["value"];
 
-// Common areas in & around Gangtok — used for the area filter.
+// Common areas in & around Gangtok — used for the area combobox + filters.
+// Owners can also type a custom area (e.g. a new locality) during listing.
 export const AREAS = [
   "Tadong",
   "MG Marg",
@@ -124,6 +125,16 @@ export const AREAS = [
   "Sichey",
   "Daragaon",
   "Burtuk",
+  "5th Mile",
+  "6th Mile",
+  "Chandmari",
+  "Syari",
+  "Nam Nang",
+  "Lower Sichey",
+  "Upper Tadong",
+  "Zero Point",
+  "Marchak",
+  "Ranka",
 ] as const;
 
 export const BOOKING_STATUS = {
