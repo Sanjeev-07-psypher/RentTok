@@ -10,7 +10,10 @@ import { Card } from "@/components/ui";
 import { ConnectNotice } from "@/components/connect-notice";
 import { BookingActions } from "@/components/booking-actions";
 import { CallButton } from "@/components/call-button";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { Booking, Profile, Room } from "@/lib/types";
+
+type TenantSummary = Pick<Profile, "id" | "full_name" | "age" | "gender" | "guardian_name">;
 
 export default async function RoomRequestsPage(props: PageProps<"/owner/rooms/[id]">) {
   if (!isSupabaseConfigured) return <ConnectNotice feature="Tenant requests" />;
@@ -30,11 +33,22 @@ export default async function RoomRequestsPage(props: PageProps<"/owner/rooms/[i
 
   const { data: bookings } = await supabase
     .from("bookings")
-    .select("*, tenant:profiles(*)")
+    .select("*")
     .eq("room_id", id)
     .order("created_at", { ascending: true });
 
-  const queue = (bookings as (Booking & { tenant: Profile | null })[]) ?? [];
+  // Owners only get the tenant fields they need to pick someone — never phone,
+  // email, address or guardian contact. Read server-side after the ownership
+  // check above, since owners have no RLS access to other people's profiles.
+  const tenantIds = [...new Set(((bookings as Booking[]) ?? []).map((b) => b.tenant_id))];
+  const { data: tenants } = tenantIds.length
+    ? await createAdminClient()
+        .from("profiles")
+        .select("id, full_name, age, gender, guardian_name")
+        .in("id", tenantIds)
+    : { data: [] };
+  const tenantById = new Map(((tenants as TenantSummary[]) ?? []).map((t) => [t.id, t]));
+  const queue = ((bookings as Booking[]) ?? []).map((b) => ({ ...b, tenant: tenantById.get(b.tenant_id) ?? null }));
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">

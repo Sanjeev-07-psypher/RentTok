@@ -24,7 +24,9 @@ export function SearchAutocomplete({
 }) {
   const router = useRouter();
   const [q, setQ] = useState(initial);
-  const [items, setItems] = useState<Suggestion[]>([]);
+  const [fetched, setItems] = useState<Suggestion[]>([]);
+  // Too-short queries show nothing without having to clear state in an effect.
+  const items = q.trim().length < 2 ? [] : fetched;
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   const ref = useRef<HTMLDivElement>(null);
@@ -40,10 +42,7 @@ export function SearchAutocomplete({
 
   useEffect(() => {
     if (timer.current) clearTimeout(timer.current);
-    if (q.trim().length < 2) {
-      setItems([]);
-      return;
-    }
+    if (q.trim().length < 2) return;
     timer.current = setTimeout(async () => {
       const res = await searchSuggestions(q);
       setItems(res);

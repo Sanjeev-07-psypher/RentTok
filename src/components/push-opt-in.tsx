@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { toast } from "sonner";
 import { Bell, BellRing } from "lucide-react";
 import { Button, Card } from "./ui";
@@ -20,17 +20,20 @@ function urlB64ToUint8Array(base64: string): Uint8Array<ArrayBuffer> {
 type Status = "loading" | "unsupported" | "default" | "granted" | "denied";
 
 // Prompt the signed-in user to enable browser/OS (Chrome) push notifications.
-export function PushOptIn() {
-  const [status, setStatus] = useState<Status>("loading");
-  const [busy, setBusy] = useState(false);
+const noopSubscribe = () => () => {};
 
-  useEffect(() => {
-    if (!("serviceWorker" in navigator) || !("PushManager" in window) || !VAPID) {
-      setStatus("unsupported");
-      return;
-    }
-    setStatus(Notification.permission as Status);
-  }, []);
+function readPermission(): Status {
+  if (!("serviceWorker" in navigator) || !("PushManager" in window) || !VAPID) return "unsupported";
+  return Notification.permission as Status;
+}
+
+export function PushOptIn() {
+  // Browser permission on mount ("loading" during SSR), overridden once the
+  // user answers the prompt.
+  const initial = useSyncExternalStore(noopSubscribe, readPermission, () => "loading" as Status);
+  const [answered, setStatus] = useState<Status | null>(null);
+  const status = answered ?? initial;
+  const [busy, setBusy] = useState(false);
 
   async function enable() {
     setBusy(true);

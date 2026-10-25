@@ -4,8 +4,27 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { requireAadhaar } from "@/lib/supabase/config";
+import { requireAadhaar, SUPABASE_URL } from "@/lib/supabase/config";
+import { MAX_PHOTOS } from "@/lib/constants";
 import { logEvent } from "@/lib/events";
+
+// Photos must be public objects in our own Supabase storage buckets — not
+// arbitrary URLs pointing anywhere on the web.
+const photoUrl = z
+  .string()
+  .url()
+  .refine((u) => {
+    if (!SUPABASE_URL) return true;
+    try {
+      const url = new URL(u);
+      return (
+        url.host === new URL(SUPABASE_URL).host &&
+        /^\/storage\/v1\/object\/public\/(building|room)-photos\//.test(url.pathname)
+      );
+    } catch {
+      return false;
+    }
+  }, "Invalid photo");
 
 export type ActionResult = { ok: true; id: string } | { ok: false; error: string };
 
@@ -27,7 +46,14 @@ const buildingSchema = z.object({
   description: z.string().max(2000).optional().default(""),
   rules: z.string().max(2000).optional().default(""),
   amenities: z.array(z.string()).default([]),
-  photoUrls: z.array(z.string().url()).default([]),
+  photoUrls: z.array(photoUrl).max(MAX_PHOTOS).default([]),
+  referral_code: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .max(12)
+    .optional()
+    .default(""),
 });
 
 export async function createBuilding(input: unknown): Promise<ActionResult> {
@@ -55,6 +81,32 @@ export async function createBuilding(input: unknown): Promise<ActionResult> {
     }
   }
 
+  // Referral: only a brand-new owner (no buildings yet) may enter one, it must
+  // belong to someone else, and an owner can only ever be referred once (the
+  // referrals PK). Points are awarded later, when this owner's first building
+  // is approved by an admin (see reviewListing → award_referral).
+  let referrerId: string | null = null;
+  if (data.referral_code) {
+    const admin = createAdminClient();
+    const { count: existing } = await admin
+      .from("buildings")
+      .select("id", { count: "exact", head: true })
+      .eq("owner_id", user.id);
+    if ((existing ?? 0) > 0) {
+      return { ok: false, error: "Referral codes can only be used on your first building." };
+    }
+    const { data: referrer } = await admin
+      .from("profiles")
+      .select("id")
+      .eq("referral_code", data.referral_code)
+      .maybeSingle();
+    if (!referrer) return { ok: false, error: "That referral code doesn't exist. Check it, or leave it empty." };
+    if (referrer.id === user.id) return { ok: false, error: "You can't use your own referral code." };
+    const { data: already } = await admin.from("referrals").select("referred_id").eq("referred_id", user.id).maybeSingle();
+    if (already) return { ok: false, error: "You've already used a referral code." };
+    referrerId = referrer.id;
+  }
+
   const { data: building, error } = await supabase
     .from("buildings")
     .insert({
@@ -80,6 +132,11 @@ export async function createBuilding(input: unknown): Promise<ActionResult> {
 
   if (error || !building) return { ok: false, error: error?.message ?? "Could not create building" };
 
+  if (referrerId) {
+    // PK on referred_id makes a concurrent double-submit harmless.
+    await createAdminClient().from("referrals").insert({ referred_id: user.id, referrer_id: referrerId });
+  }
+
   if (data.photoUrls.length) {
     await supabase.from("building_photos").insert(
       data.photoUrls.map((url, i) => ({ building_id: building.id, url, sort_order: i }))
@@ -104,7 +161,7 @@ const roomSchema = z.object({
   total_units: z.coerce.number().int().min(1).max(100).default(1),
   description: z.string().max(2000).optional().default(""),
   amenities: z.array(z.string()).default([]),
-  photoUrls: z.array(z.string().url()).default([]),
+  photoUrls: z.array(photoUrl).max(MAX_PHOTOS).default([]),
 });
 
 export async function addRoom(input: unknown): Promise<ActionResult> {
@@ -355,6 +412,10 @@ export async function setBuildingActive(
 
   const { error } = await supabase.from("buildings").update({ active }).eq("id", buildingId);
   if (error) return { ok: false, error: error.message };
+
+  // Cascade to every room in the building so their state stays in sync:
+  // deactivating a building pauses all its rooms; reactivating brings them back.
+  await supabase.from("rooms").update({ active }).eq("building_id", buildingId).eq("owner_id", user.id);
 
   await logEvent({
     type: active ? "building_activated" : "building_deactivated",

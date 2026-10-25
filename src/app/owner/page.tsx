@@ -11,6 +11,7 @@ import { DeleteListingButton } from "@/components/delete-listing-button";
 import { DeleteBuildingButton } from "@/components/delete-building-button";
 import { ActiveToggle } from "@/components/active-toggle";
 import { ProfileCard } from "@/components/profile-card";
+import { ReferralCard } from "@/components/referral-card";
 import type { Building, Room } from "@/lib/types";
 
 export const metadata = { title: "Dashboard — RentTok" };
@@ -84,6 +85,8 @@ export default async function OwnerDashboard() {
         address={prof?.permanent_address ?? null}
         detailsComplete={tenantDetailsComplete(prof)}
       />
+
+      {prof?.referral_code && <ReferralCard code={prof.referral_code} count={prof.referral_count ?? 0} />}
 
       {/* Buildings */}
       <div className="mt-8 flex items-center justify-between border-t border-[var(--border)] pt-8">

@@ -1,7 +1,7 @@
 import type { AmenityValue, RoomType, BuildingType, Availability } from "./constants";
 
 export type ListingStatus = "pending" | "approved" | "rejected";
-export type BookingStatus = "queued" | "accepted" | "rejected" | "cancelled" | "confirmed" | "refunded";
+export type BookingStatus = "queued" | "accepted" | "rejected" | "cancelled" | "confirmed" | "refunded" | "ended";
 export type PaymentStatus = "created" | "paid" | "failed" | "refunded" | "partially_refunded";
 export type AadhaarStatus = "none" | "pending" | "verified" | "rejected";
 
@@ -28,6 +28,7 @@ export interface Building {
   owner_verified_at: string | null;
   rating: number | null;
   review_count: number;
+  referral_score?: number;
   created_at: string;
   photos?: BuildingPhoto[];
   rooms?: Room[];
@@ -62,6 +63,8 @@ export interface Profile {
   aadhaar_path: string | null;
   aadhaar_submitted_at: string | null;
   aadhaar_reviewed_at: string | null;
+  referral_code: string | null;
+  referral_count: number;
   created_at: string;
 }
 
@@ -115,6 +118,7 @@ export interface Booking {
   queue_position: number | null;
   cancelled_by: "owner" | "tenant" | "system" | null;
   confirmed_at: string | null;
+  ended_at: string | null;
   created_at: string;
   room?: Room;
   tenant?: Profile;

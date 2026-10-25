@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Home as HomeIcon, Building, Building2, House, Search, ShieldCheck, KeyRound, Sparkles } from "lucide-react";
-import { getBuildings, getFeaturedBuildings, getWishlistIds } from "@/lib/data";
+import { getBuildings, getWishlistIds } from "@/lib/data";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { BUILDING_TYPES, AREAS } from "@/lib/constants";
 import { HeroSearch } from "@/components/hero-search";
@@ -17,11 +17,9 @@ const TYPE_ICON: Record<string, React.ReactNode> = {
 };
 
 export default async function Home() {
-  const [featured, buildings, wishlistedIds] = await Promise.all([
-    getFeaturedBuildings(),
-    getBuildings(),
-    getWishlistIds(),
-  ]);
+  // One query feeds both rows: referral priority → availability → newest.
+  const [buildings, wishlistedIds] = await Promise.all([getBuildings({ sort: "featured" }), getWishlistIds()]);
+  const featured = buildings.slice(0, 8);
 
   return (
     <div>

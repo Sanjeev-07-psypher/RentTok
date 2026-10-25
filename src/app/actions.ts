@@ -7,8 +7,13 @@ import type { Building } from "@/lib/types";
 
 // Buildings closest to the given coordinates (used by the homepage "near you" row).
 export async function nearbyBuildings(lat: number, lng: number): Promise<Building[]> {
-  const all = await getBuildings({ sort: "nearest", lat, lng });
-  return all.slice(0, 8);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return [];
+  try {
+    const all = await getBuildings({ sort: "nearest", lat, lng });
+    return all.slice(0, 8);
+  } catch {
+    return [];
+  }
 }
 
 export interface Suggestion {
@@ -34,7 +39,12 @@ export async function searchSuggestions(q: string): Promise<Suggestion[]> {
       href: `/search?area=${encodeURIComponent(x.a)}`,
     }));
 
-  const buildings = await getBuildings({});
+  let buildings: Building[] = [];
+  try {
+    buildings = await getBuildings({});
+  } catch {
+    // Suggestions are best-effort; areas still show if listings can't load.
+  }
   const buildingHits: Suggestion[] = buildings
     .map((b) => ({ b, s: Math.max(fuzzyScore(query, b.name), fuzzyScore(query, b.area)) }))
     .filter((x) => x.s >= 0.45)

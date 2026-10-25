@@ -105,3 +105,10 @@ export function timeAgo(iso: string): string {
   if (days < 30) return `${days}d ago`;
   return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 }
+
+// Only allow same-site relative paths as a post-login destination. Values like
+// "//evil.com" or "/\evil.com" are protocol-relative and would leave the site.
+export function safeNextPath(raw: string | null | undefined): string {
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//") || raw.startsWith("/\\")) return "/";
+  return raw;
+}

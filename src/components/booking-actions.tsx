@@ -3,9 +3,9 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Check, X, Handshake } from "lucide-react";
+import { Check, X, Handshake, LogOut } from "lucide-react";
 import { Button } from "./ui";
-import { acceptBooking, rejectBooking, confirmBooking } from "@/app/bookings/actions";
+import { acceptBooking, rejectBooking, confirmBooking, endTenancy } from "@/app/bookings/actions";
 
 // Owner-side controls for one request in the queue.
 export function BookingActions({
@@ -33,7 +33,26 @@ export function BookingActions({
       }
     });
 
-  if (status === "confirmed") return <Label className="text-[var(--success)]">Confirmed ✓</Label>;
+  if (status === "confirmed") {
+    return (
+      <div className="flex items-center gap-2">
+        <Label className="text-[var(--success)]">Confirmed ✓</Label>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => {
+            if (confirm("Mark this stay as ended? The unit will become available again.")) {
+              run(endTenancy, "Stay ended — the unit is available again");
+            }
+          }}
+          disabled={pending}
+        >
+          <LogOut size={15} /> End stay
+        </Button>
+      </div>
+    );
+  }
+  if (status === "ended") return <Label>Stay ended</Label>;
   if (status === "rejected") return <Label>Declined</Label>;
   if (status === "cancelled") return <Label>Cancelled by tenant</Label>;
   if (status === "refunded") return <Label>Room filled — released</Label>;

@@ -144,6 +144,7 @@ export const BOOKING_STATUS = {
   cancelled: "Cancelled",
   confirmed: "Confirmed 🎉",
   refunded: "Room filled — released",
+  ended: "Stay ended",
 } as const;
 
 export const LISTING_STATUS = {
