@@ -6,7 +6,10 @@ export const RAZORPAY_KEY_ID = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ?? "";
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET ?? "";
 const RAZORPAY_WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET ?? "";
 
-export const isRazorpayConfigured = Boolean(RAZORPAY_KEY_ID && RAZORPAY_KEY_SECRET);
+// v1 is free: the paid-booking routes stay dormant unless explicitly switched on,
+// even if Razorpay keys happen to be present in the environment.
+export const isPaymentsEnabled = process.env.PAYMENTS_ENABLED === "true";
+export const isRazorpayConfigured = isPaymentsEnabled && Boolean(RAZORPAY_KEY_ID && RAZORPAY_KEY_SECRET);
 
 // ₹30 booking fee by default; override with NEXT_PUBLIC_BOOKING_FEE_PAISE.
 export const BOOKING_FEE_PAISE = Number(process.env.NEXT_PUBLIC_BOOKING_FEE_PAISE ?? "3000");

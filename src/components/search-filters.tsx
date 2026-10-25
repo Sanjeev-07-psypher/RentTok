@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useRef, useState, useTransition } from "react";
 import {
   BUILDING_TYPES,
   AREAS,
@@ -48,9 +48,14 @@ export function SearchFilters() {
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Keep local chips in sync when the URL changes elsewhere (Clear filters, nav).
-  useEffect(() => {
+  // Adjusting state during render (React's recommended pattern) avoids an
+  // extra effect pass.
+  const urlAmenities = params.getAll("amenity").join(",");
+  const [syncedAmenities, setSyncedAmenities] = useState(urlAmenities);
+  if (syncedAmenities !== urlAmenities) {
+    setSyncedAmenities(urlAmenities);
     setAmenitySel(params.getAll("amenity"));
-  }, [params]);
+  }
 
   const toggleAmenity = (value: string) => {
     setAmenitySel((prev) => {
@@ -180,8 +185,12 @@ function PriceRange({
   const [max, setMax] = useState(initialMax);
 
   // Keep local state in sync if the URL changes elsewhere (e.g. Clear filters).
-  useEffect(() => setMin(initialMin), [initialMin]);
-  useEffect(() => setMax(initialMax), [initialMax]);
+  const [synced, setSynced] = useState({ initialMin, initialMax });
+  if (synced.initialMin !== initialMin || synced.initialMax !== initialMax) {
+    setSynced({ initialMin, initialMax });
+    setMin(initialMin);
+    setMax(initialMax);
+  }
 
   const pct = (v: number) => ((v - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100;
 

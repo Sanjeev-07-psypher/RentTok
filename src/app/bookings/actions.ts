@@ -40,13 +40,23 @@ export async function requestBooking(roomId: string): Promise<RequestResult> {
     return { ok: false, error: "Please add your details first." };
   }
 
-  // Room must be live and have a free unit.
+  // Room must be live (approved + active, in an approved + active building) and
+  // have a free unit. The admin client bypasses RLS, so check visibility here.
   const { data: room } = await admin
     .from("rooms")
-    .select("id, status, total_units, booked_units, owner_id, title")
+    .select("id, status, active, total_units, booked_units, owner_id, title, building:buildings(status, active)")
     .eq("id", roomId)
     .single();
-  if (!room || room.status !== "approved") return { ok: false, error: "Room is not available." };
+  const parent = (room as unknown as { building: { status: string; active: boolean } | null } | null)?.building;
+  if (
+    !room ||
+    room.status !== "approved" ||
+    room.active === false ||
+    (parent && (parent.status !== "approved" || parent.active === false))
+  ) {
+    return { ok: false, error: "Room is not available." };
+  }
+  if (room.owner_id === user.id) return { ok: false, error: "You can't request your own room." };
   if ((room.booked_units ?? 0) >= (room.total_units ?? 1)) {
     return { ok: false, error: "This room is fully booked." };
   }
@@ -296,13 +306,16 @@ export async function confirmBooking(bookingId: string): Promise<Result> {
       .in("status", ["queued", "accepted"]);
 
     for (const other of others ?? []) {
+      // Re-check status so a request cancelled meanwhile isn't overwritten.
       const { data: rel } = await admin
         .from("bookings")
         .update({ status: "refunded", cancelled_by: "system" })
         .eq("id", other.id)
+        .in("status", ["queued", "accepted"])
         .select("tenant_id")
-        .single();
-      if (rel?.tenant_id) {
+        .maybeSingle();
+      if (!rel) continue;
+      if (rel.tenant_id) {
         await notifyUser({
           userId: rel.tenant_id,
           type: "booking_released",
@@ -336,6 +349,50 @@ export async function confirmBooking(bookingId: string): Promise<Result> {
     title: "Booking confirmed 🎉",
     body: "The match is locked in. Reach out to your new tenant to coordinate move-in.",
     link: `/owner/rooms/${booking.room_id}`,
+  });
+  revalidate();
+  return { ok: true };
+}
+
+// Owner marks a confirmed stay as over (tenant moved out). The unit frees up and
+// the room becomes requestable again.
+export async function endTenancy(bookingId: string): Promise<Result> {
+  const uid = await currentUserId();
+  if (!uid) return { ok: false, error: "Please sign in." };
+  const booking = await loadBooking(bookingId);
+  if (!booking?.room) return { ok: false, error: "Booking not found." };
+  if (booking.room.owner_id !== uid) return { ok: false, error: "Only the owner can end a stay." };
+  if (booking.status !== "confirmed") return { ok: false, error: "Only a confirmed stay can be ended." };
+
+  const admin = createAdminClient();
+  const { data: ended } = await admin
+    .from("bookings")
+    .update({ status: "ended", ended_at: new Date().toISOString() })
+    .eq("id", bookingId)
+    .eq("status", "confirmed")
+    .select("id");
+  if (!ended || ended.length === 0) return { ok: false, error: "This stay was already ended." };
+
+  // Recompute from the authoritative confirmed count (same approach as confirm).
+  const { count } = await admin
+    .from("bookings")
+    .select("id", { count: "exact", head: true })
+    .eq("room_id", booking.room_id)
+    .eq("status", "confirmed");
+  const { data: roomRow } = await admin.from("rooms").select("total_units").eq("id", booking.room_id).single();
+  const booked = count ?? 0;
+  await admin
+    .from("rooms")
+    .update({ booked_units: booked, availability: booked >= (roomRow?.total_units ?? 1) ? "booked" : "available" })
+    .eq("id", booking.room_id);
+
+  await logEvent({ type: "booking_ended", actorId: uid, entity: "booking", entityId: bookingId, meta: { room_id: booking.room_id } });
+  await notifyUser({
+    userId: booking.tenant_id,
+    type: "booking_ended",
+    title: "Your stay was marked as ended",
+    body: "The owner marked your stay as over. Thanks for using RentTok!",
+    link: "/account/bookings",
   });
   revalidate();
   return { ok: true };

@@ -47,6 +47,7 @@ export default function NewBuildingPage() {
   const [rules, setRules] = useState("");
   const [amenities, setAmenities] = useState<string[]>([]);
   const [photos, setPhotos] = useState<Photo[]>([]);
+  const [referralCode, setReferralCode] = useState("");
 
   const toggleAmenity = (v: string) =>
     setAmenities((prev) => (prev.includes(v) ? prev.filter((a) => a !== v) : [...prev, v]));
@@ -181,6 +182,7 @@ export default function NewBuildingPage() {
       rules,
       amenities,
       photoUrls: photos.filter((p) => p.url).map((p) => p.url),
+      referral_code: referralCode,
     });
     setSubmitting(false);
     if (result.ok) {
@@ -233,6 +235,15 @@ export default function NewBuildingPage() {
                 </Select>
               </Field>
             </div>
+            <Field label="Referral code (optional)">
+              <Input
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12))}
+                placeholder="e.g. RT7K2MPQ — if another owner told you about RentTok"
+                autoCapitalize="characters"
+              />
+              <p className="mt-1 text-xs text-[var(--muted)]">Only for your first building.</p>
+            </Field>
           </>
         )}
 

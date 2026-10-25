@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { X, Download, Share, Plus, SquarePlus } from "lucide-react";
 
 interface BIPEvent extends Event {
@@ -27,9 +27,11 @@ function isIOSDevice(): boolean {
   return /Macintosh/i.test(ua) && navigator.maxTouchPoints > 1;
 }
 
+const noopSubscribe = () => () => {};
+
 export function InstallPrompt() {
   const [show, setShow] = useState(false);
-  const [iosHint, setIosHint] = useState(false);
+  const iosHint = useSyncExternalStore(noopSubscribe, isIOSDevice, () => false);
   const [guideOpen, setGuideOpen] = useState(false);
   const deferred = useRef<BIPEvent | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -42,8 +44,6 @@ export function InstallPrompt() {
     const iOS = isIOSDevice();
     const isMobile = iOS || /Android/i.test(navigator.userAgent);
     if (!isMobile || isStandalone()) return; // hide while running as the installed app
-
-    if (iOS) setIosHint(true);
 
     // Ms remaining in the snooze window (0 if not snoozed / already elapsed).
     const snoozeLeft = () => {

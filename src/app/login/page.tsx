@@ -3,11 +3,12 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AuthDialog } from "@/components/auth-dialog";
+import { safeNextPath } from "@/lib/utils";
 
 function LoginInner() {
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next") ?? "/";
+  const next = safeNextPath(params.get("next"));
   const [open, setOpen] = useState(true);
 
   return (

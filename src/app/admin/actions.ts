@@ -37,6 +37,10 @@ export async function reviewListing(buildingId: string, status: "approved" | "re
   // Cascade approval to the building's pending rooms so they become bookable.
   if (status === "approved") {
     await supabase.from("rooms").update({ status: "approved" }).eq("building_id", buildingId).eq("status", "pending");
+    // First approved building of a referred owner → credit their referrer once.
+    // award_referral is idempotent (atomic rewarded_at claim).
+    const { error: refErr } = await createAdminClient().rpc("award_referral", { p_referred: building.owner_id });
+    if (refErr) console.error("award_referral failed", refErr.message);
   }
 
   // Acknowledge the owner with an in-app notification.

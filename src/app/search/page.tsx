@@ -8,6 +8,12 @@ import { BuildingCard } from "@/components/building-card";
 
 export const metadata = { title: "Search rooms — RentTok" };
 
+function toCoord(v: string | undefined, limit: number): number | undefined {
+  if (v == null || v === "") return undefined;
+  const n = Number(v);
+  return Number.isFinite(n) && Math.abs(n) <= limit ? n : undefined;
+}
+
 export default async function SearchPage(props: PageProps<"/search">) {
   const sp = await props.searchParams;
 
@@ -30,6 +36,10 @@ export default async function SearchPage(props: PageProps<"/search">) {
       amenities,
       availableOnly: get("available") === "1",
       sort: get("sort"),
+      // "Near me" puts the user's coordinates in the URL; without passing them
+      // through, no distances were computed and "nearest" sorted nothing.
+      lat: toCoord(get("lat"), 90),
+      lng: toCoord(get("lng"), 180),
     }),
     getWishlistIds(),
   ]);

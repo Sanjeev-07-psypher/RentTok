@@ -6,6 +6,10 @@ import { distanceKm, fuzzyScore, normalizeText } from "./utils";
 import { AREAS } from "./constants";
 import type { Room, Building, Notification, Review } from "./types";
 
+// Upper bound on buildings pulled per query. Gangtok-scale inventory fits well
+// inside this; revisit with SQL-side pagination if listings ever approach it.
+const MAX_BUILDINGS = 1000;
+
 // ---------------------------------------------------------------------------
 // Buildings (the primary listing entity)
 // ---------------------------------------------------------------------------
@@ -18,7 +22,7 @@ export interface BuildingFilters {
   maxRent?: number;
   amenities?: string[];
   availableOnly?: boolean;
-  sort?: string; // newest | price_asc | price_desc | rating | nearest
+  sort?: string; // featured | newest | price_asc | price_desc | rating | nearest
   lat?: number;
   lng?: number;
 }
@@ -65,6 +69,11 @@ function sortBuildings(list: Building[], f: BuildingFilters): Building[] {
 
   const byChosen = (a: Building, b: Building): number => {
     switch (f.sort) {
+      case "featured": // homepage: referral priority first, then newest
+        return (
+          (b.referral_score ?? 0) - (a.referral_score ?? 0) ||
+          +new Date(b.created_at) - +new Date(a.created_at)
+        );
       case "price_asc":
         return (a.min_rent ?? 0) - (b.min_rent ?? 0);
       case "price_desc":
@@ -78,6 +87,16 @@ function sortBuildings(list: Building[], f: BuildingFilters): Building[] {
     }
   };
 
+  // Referral priority outranks availability on the homepage ("featured");
+  // everywhere else available stays come first.
+  if (f.sort === "featured") {
+    return [...list].sort(
+      (a, b) =>
+        (b.referral_score ?? 0) - (a.referral_score ?? 0) ||
+        availRank(a) - availRank(b) ||
+        +new Date(b.created_at) - +new Date(a.created_at)
+    );
+  }
   return [...list].sort((a, b) => availRank(a) - availRank(b) || byChosen(a, b));
 }
 
@@ -109,17 +128,25 @@ export async function getBuildings(filters: BuildingFilters = {}): Promise<Build
     .eq("status", "approved")
     .eq("active", true);
 
-  if (filters.q)
-    query = query.or(`name.ilike.%${filters.q}%,area.ilike.%${filters.q}%,address.ilike.%${filters.q}%`);
+  if (filters.q) {
+    // Strip characters that have meaning in a PostgREST filter string so user
+    // input can't break out of the ilike pattern.
+    const q = filters.q.replace(/[%,()*\\:."']/g, " ").trim();
+    if (q) query = query.or(`name.ilike.%${q}%,area.ilike.%${q}%,address.ilike.%${q}%`);
+  }
   if (filters.type) query = query.eq("type", filters.type);
   if (filters.area) query = query.eq("area", filters.area);
   if (filters.forGender && filters.forGender !== "any") query = query.eq("for_gender", filters.forGender);
   if (filters.amenities?.length) query = query.contains("amenities", filters.amenities);
 
-  const { data, error } = await query.limit(60);
+  // Price / availability / fuzzy text are applied in JS after this, so fetch
+  // the whole (newest-first) catalogue rather than an arbitrary first page —
+  // a small cap silently dropped listings once there were more than 60.
+  const { data, error } = await query.order("created_at", { ascending: false }).limit(MAX_BUILDINGS);
   if (error) {
+    // Surface it: an unreachable/paused database must not look like "no listings".
     console.error("getBuildings error", error.message);
-    return [];
+    throw new Error(`Could not load listings: ${error.message}`);
   }
 
   const buildings = (data as Building[]).map((b) => withAggregates(b, filters.lat, filters.lng));
@@ -127,7 +154,7 @@ export async function getBuildings(filters: BuildingFilters = {}): Promise<Build
 }
 
 export async function getFeaturedBuildings(): Promise<Building[]> {
-  const buildings = await getBuildings({ sort: "newest" });
+  const buildings = await getBuildings({ sort: "featured" });
   return buildings.slice(0, 8);
 }
 

@@ -21,6 +21,7 @@ const statusColor: Record<string, string> = {
   rejected: "text-[var(--muted)]",
   cancelled: "text-[var(--muted)]",
   refunded: "text-[var(--muted)]",
+  ended: "text-[var(--muted)]",
 };
 
 export default async function BookingsPage() {

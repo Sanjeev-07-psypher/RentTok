@@ -9,8 +9,9 @@ export async function POST(request: Request) {
   const id = url.searchParams.get("id");
   const token = url.searchParams.get("token");
 
-  // Validate the shared secret if one is configured.
-  if (EXOTEL_CALLBACK_SECRET && token !== EXOTEL_CALLBACK_SECRET) {
+  // Always require the shared secret — without one anyone could forge call
+  // status / recording updates.
+  if (!EXOTEL_CALLBACK_SECRET || token !== EXOTEL_CALLBACK_SECRET) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
